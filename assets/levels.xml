@@ -1,0 +1,5 @@
+<root>
+<item id="1" text="1" level="app/native/assets/levels/level1.json"/>
+<item id="2" text="2" level="app/native/assets/levels/level2.json"/>
+<item id="3" text="3" level="app/native/assets/levels/level3.json"/>
+</root>
