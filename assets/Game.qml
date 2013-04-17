@@ -1,146 +1,155 @@
 import bb.cascades 1.0
 
 Page {
-    property variant dimensions: Dimensions {}
-    Container {
+    property variant dimensions: Dimensions {
+    }
+
+    content: Container {
         id: background
-        background: Color.Green
-        layout: StackLayout {
+        background: Color.Black
+        layout: AbsoluteLayout {
         }
         Container {
-            id: topbar
-            horizontalAlignment: HorizontalAlignment.Fill
-            preferredHeight: dimensions.topBarHeight
+            id: mapArea
+            objectName: "mapArea"
+            layoutProperties: AbsoluteLayoutProperties {
+                positionX: 0
+                positionY: dimensions.queueHeight
+            }
+            preferredWidth: dimensions.playAreaWidth
+            preferredHeight: dimensions.playAreaHeight
+            background: Color.Green
+            layout: DockLayout {}
+        }
+
+        Container {
+            id: progressBar
+            layoutProperties: AbsoluteLayoutProperties {
+                positionX: dimensions.screenWidth
+                positionY: 0
+            }
             layout: StackLayout {
                 orientation: LayoutOrientation.LeftToRight
             }
-            background: Color.Cyan
-            Container {
-                id: minimapContainer
-                background: Color.Black
-                preferredHeight: dimensions.topBarHeight
-                Container {
-                    id: minimap
-                    objectName: "minimap"
-                    layout: AbsoluteLayout {}
-                    horizontalAlignment: HorizontalAlignment.Center
-                    preferredWidth: dimensions.topBarHeight
-                    preferredHeight: dimensions.topBarHeight
-                    background: Color.Red
-                    gestureHandlers: [
-                        TapHandler {
-                            onTapped: {
-                                programContainer.visible = ! programContainer.visible;
-                                controlContainer.visible = ! controlContainer.visible;
-                                var size = dimensions.topBarHeight;
-                                if (minimap.preferredWidth == dimensions.topBarHeight) {
-                                    if (_app.screenWidth > _app.screenHeight) size = _app.screenHeight - dimensions.topBarHeight;
-                                    else size = _app.screenWidth
-                                }
-                                minimap.preferredWidth = size;
-                                minimap.preferredHeight = size;
-                                minimapContainer.preferredHeight = size;
-                                topbar.preferredHeight = size;
-                                controlContainer.preferredHeight = size;
-                            }
-                        }
-                    ]
-                }
-            }
-            Container {
-                id: controlContainer
-                background: Color.Gray
-                layoutProperties: StackLayoutProperties {
-                    spaceQuota: 3.0
-                }
-                layout: DockLayout {}
-                
-                preferredHeight: dimensions.topBarHeight
-                Container {
-                    horizontalAlignment: HorizontalAlignment.Center
-                    verticalAlignment: VerticalAlignment.Center
-
-                    Container {
-                        layout: StackLayout {
-                            orientation: LayoutOrientation.LeftToRight
-                        }
-                        
-                        GameControl {
-                            gestureHandlers: [
-                                TapHandler {
-                                    onTapped: {
-                                        console.debug("Tapped control 1");
-                                    }
-                                }
-                            ]
-                        }
-
-                        GameControl {
-                            gestureHandlers: [
-                                TapHandler {
-                                    onTapped: {
-                                        console.debug("Tapped control 2");
-                                    }
-                                }
-                            ]
-                        }
-
-                        GameControl {
-                            gestureHandlers: [
-                                TapHandler {
-                                    onTapped: {
-                                        console.debug("Tapped control 3");
-                                    }
-                                }
-                            ]
-                        }
-                    }
-
-                    Container {
-                        topMargin: 20
-                        layout: StackLayout {
-                            orientation: LayoutOrientation.LeftToRight
-                        }
-
-                        GameControl {
-
-                        }
-
-                        GameControl {
-
-                        }
-
-                        GameControl {
-
-                        }
-                    }
-                }
-            }
+            preferredHeight: dimensions.queueHeight
+            preferredWidth: dimensions.screenWidth
+            background: Color.Red
+            leftPadding: dimensions.sidebarPadding
+            animations: [
+                SequentialAnimation {
+                    id: progressAnimation
+                    objectName: "progressAnimation"
+	                TranslateTransition {
+	                    id: translateLeft
+	                    fromX: 0
+	                    toX: -dimensions.screenWidth
+	                    duration: 1900 // FIXME: Connect to app
+	                }
+	            }
+            ]
         }
+
         Container {
-            id: programContainer
-            horizontalAlignment: HorizontalAlignment.Fill
-            layoutProperties: StackLayoutProperties {
-                spaceQuota: 3.0
+            id: queueContainer
+            objectName: "queueContainer"
+            layoutProperties: AbsoluteLayoutProperties {
+                positionX: 0
+                positionY: 0
             }
+            layout: StackLayout {
+                orientation: LayoutOrientation.LeftToRight
+            }
+            preferredHeight: dimensions.queueHeight
+            preferredWidth: dimensions.playAreaWidth
+            leftPadding: dimensions.sidebarPadding
+        }
+        
+        Container {
+            id: sidebar
+            layoutProperties: AbsoluteLayoutProperties {
+                positionX: dimensions.playAreaWidth
+                positionY: 0
+            }
+            preferredHeight: dimensions.screenHeight
+            preferredWidth: dimensions.sidebarWidth
             background: Color.Blue
-            Label {
-                text: "Functions go here"
+            topPadding: dimensions.sidebarPadding
+            bottomPadding: dimensions.sidebarPadding
+
+            Container {
+                id: cmdForward
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                background: Color.Gray
+                bottomMargin: dimensions.sidebarPadding
+
+                Label {
+                    text: "F"
+                }
+
+                gestureHandlers: [
+                    TapHandler {
+                        onTapped: {
+                            _app.tapForward();
+                        }
+                    }
+                ]
+            }
+
+            Container {
+                id: cmdLeft
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                background: Color.Gray
+                bottomMargin: dimensions.sidebarPadding
+
+                Label {
+                    text: "L"
+                }
+
+                gestureHandlers: [
+                    TapHandler {
+                        onTapped: {
+                            _app.tapLeft();
+                        }
+                    }
+                ]
+            }
+
+            Container {
+                id: cmdRight
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                background: Color.Gray
+                bottomMargin: dimensions.sidebarPadding
+
+                Label {
+                    text: "R"
+                }
+
+                gestureHandlers: [
+                    TapHandler {
+                        onTapped: {
+                            _app.tapRight();
+                        }
+                    }
+                ]
             }
         }
-    }
-    function resizeWorld() {
-        programContainer.visible = ! programContainer.visible;
-        controlContainer.visible = ! controlContainer.visible;
-        var size = 180;
-        if (minimap.preferredWidth == 180) {
-            if (_app.screenWidth > _app.screenHeight) size = _app.screenHeight - 100;
-            else size = _app.screenWidth
+        Button {
+            layoutProperties: AbsoluteLayoutProperties {
+                positionX: 0
+                positionY: dimensions.screenHeight - dimensions.backButtonHeight - dimensions.sidebarPadding
+            }
+            preferredWidth: dimensions.backButtonHeight*3
+            opacity: 0.5
+            text: "Back"
+            onClicked: {
+                _app.back();
+            }
         }
-        minimap.preferredWidth = size;
-        minimap.preferredHeight = size;
-        minimapContainer.preferredHeight = size;
-        topbar.preferredHeight = size;
-        controlContainer.preferredHeight = size;
-    }
+    }   
 }
