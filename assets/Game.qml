@@ -9,72 +9,81 @@ Page {
         background: Color.Black
         layout: AbsoluteLayout {
         }
+        
         Container {
             id: mapArea
             objectName: "mapArea"
             layoutProperties: AbsoluteLayoutProperties {
                 positionX: 0
-                positionY: dimensions.queueHeight
+                positionY: compilePhaseContainer.visible ? 0 : dimensions.queueHeight
             }
             preferredWidth: dimensions.playAreaWidth
-            preferredHeight: dimensions.playAreaHeight
-            background: Color.Black
+            preferredHeight: compilePhaseContainer.visible ? dimensions.compileMapHeight : dimensions.playAreaHeight
             layout: DockLayout {
             }
         }
-
+        
         Container {
-            id: progressBar
-            layoutProperties: AbsoluteLayoutProperties {
-                positionX: dimensions.screenWidth
-                positionY: 0
-            }
-            layout: StackLayout {
-                orientation: LayoutOrientation.LeftToRight
-            }
-            preferredHeight: dimensions.queueHeight
-            preferredWidth: dimensions.screenWidth
-            background: Color.Red
-            leftPadding: dimensions.sidebarPadding
-            animations: [
-                SequentialAnimation {
-                    id: progressAnimation
-                    objectName: "progressAnimation"
-                    TranslateTransition {
-                        id: translateLeft
-                        fromX: 0
-                        toX: - dimensions.screenWidth
-                        duration: 1900 // FIXME: Connect to app
-                    }
-                }
-            ]
-        }
-
-        Container {
-            id: queueContainer
-            objectName: "queueContainer"
+            id: queueUniverse
+            objectName: "queueUniverse"
             layoutProperties: AbsoluteLayoutProperties {
                 positionX: 0
                 positionY: 0
             }
-            layout: StackLayout {
-                orientation: LayoutOrientation.LeftToRight
-            }
             preferredHeight: dimensions.queueHeight
-            preferredWidth: dimensions.playAreaWidth
-            leftPadding: dimensions.sidebarPadding
-
-            QueueCommand {
+            preferredWidth: dimensions.screenWidth
+            visible: !compilePhaseContainer.visible
+            layout: AbsoluteLayout {
             }
-            QueueCommand {
-            }
-            QueueCommand {
-            }
-            QueueCommand {
-            }
-            QueueCommand {
-            }
-
+            ImageView {
+	            id: progressBarBackground
+	            layoutProperties: AbsoluteLayoutProperties {
+	                positionX: 0
+	                positionY: 0
+	            }
+	            preferredHeight: dimensions.queueHeight
+	            preferredWidth: dimensions.screenWidth
+	            imageSource: "asset:///images/queue-glow.amd"
+	        }
+	
+	        Container {
+	            id: progressBar
+	            layoutProperties: AbsoluteLayoutProperties {
+	                positionX: 0
+	                positionY: 0
+	            }
+	            preferredHeight: dimensions.queueHeight
+	            preferredWidth: dimensions.screenWidth
+	            background: Color.Black
+	            opacity: 0.7
+	            animations: [
+	                SequentialAnimation {
+	                    id: progressAnimation
+	                    objectName: "progressAnimation"
+	                    TranslateTransition {
+	                        id: translateLeft
+	                        fromX: 0
+	                        toX: - dimensions.screenWidth
+	                        duration: 1900 // FIXME: Connect duration to app timer
+	                    }
+	                }
+	            ]
+	        }
+	
+	        Container {
+	            id: queueContainer
+	            objectName: "queueContainer"
+	            layoutProperties: AbsoluteLayoutProperties {
+	                positionX: 0
+	                positionY: 0
+	            }
+	            layout: StackLayout {
+	                orientation: LayoutOrientation.LeftToRight
+	            }
+	            preferredHeight: dimensions.queueHeight
+	            preferredWidth: dimensions.playAreaWidth
+	            leftPadding: dimensions.sidebarPadding
+	        }
         }
 
         Container {
@@ -94,11 +103,11 @@ Page {
                 horizontalAlignment: HorizontalAlignment.Center
                 preferredWidth: dimensions.cmdWidth
                 preferredHeight: dimensions.cmdHeight
-                background: Color.Gray
+                background: Color.Black
                 bottomMargin: dimensions.itemPadding
 
-                Label {
-                    text: "F"
+                ImageView {
+                    imageSource: "asset:///images/forward.png"
                 }
 
                 gestureHandlers: [
@@ -115,11 +124,11 @@ Page {
                 horizontalAlignment: HorizontalAlignment.Center
                 preferredWidth: dimensions.cmdWidth
                 preferredHeight: dimensions.cmdHeight
-                background: Color.Gray
+                background: Color.Black
                 bottomMargin: dimensions.itemPadding
 
-                Label {
-                    text: "L"
+                ImageView {
+                    imageSource: "asset:///images/left.png"
                 }
 
                 gestureHandlers: [
@@ -136,17 +145,102 @@ Page {
                 horizontalAlignment: HorizontalAlignment.Center
                 preferredWidth: dimensions.cmdWidth
                 preferredHeight: dimensions.cmdHeight
-                background: Color.Gray
+                background: Color.Black
                 bottomMargin: dimensions.itemPadding
 
-                Label {
-                    text: "R"
+                ImageView {
+                    imageSource: "asset:///images/right.png"
                 }
 
                 gestureHandlers: [
                     TapHandler {
                         onTapped: {
                             _app.tapRight();
+                        }
+                    }
+                ]
+            }
+
+            Container {
+                id: cmdF1
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                background: Color.Black
+                bottomMargin: dimensions.itemPadding
+
+                ImageView {
+                    imageSource: "asset:///images/f1.png"
+                }
+
+                gestureHandlers: [
+                    TapHandler {
+                        onTapped: {
+                            _app.tapF1();
+                        }
+                    }
+                ]
+            }
+
+            Container {
+                id: cmdF2
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                background: Color.Black
+                bottomMargin: dimensions.itemPadding
+
+                ImageView {
+                    imageSource: "asset:///images/f2.png"
+                }
+
+                gestureHandlers: [
+                    TapHandler {
+                        onTapped: {
+                            _app.tapF2();
+                        }
+                    }
+                ]
+            }
+
+            Container {
+                id: cmdF3
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                background: Color.Black
+                bottomMargin: dimensions.itemPadding
+
+                ImageView {
+                    imageSource: "asset:///images/f3.png"
+                }
+
+                gestureHandlers: [
+                    TapHandler {
+                        onTapped: {
+                            _app.tapF3();
+                        }
+                    }
+                ]
+            }
+            
+            Container {
+                id: cmdViewFunctions
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                background: Color.Black
+                bottomMargin: dimensions.itemPadding
+                visible: compilePhaseContainer.visible == false
+                
+                ImageView {
+                    imageSource: "asset:///images/viewfunctions.png"
+                }
+
+                gestureHandlers: [
+                    TapHandler {
+                        onTapped: {
+                            _app.tapViewFunctions();
                         }
                     }
                 ]
@@ -167,11 +261,90 @@ Page {
                 text: "Pause"
                 verticalAlignment: VerticalAlignment.Center
                 horizontalAlignment: HorizontalAlignment.Center
-                visible: dimensions.screenWidth > 1000
+                visible: dimensions.screenWidth > 1000 
+                    && compilePhaseContainer.visible == false 
+                    && menuContainer.visible == false
                 onClicked: {
-                    _app.back(); // FIXME: Menu
+                    _app.pause();
+                    menuContainer.setVisible(true);
+                }
+            }
+        }
+        
+        Container {
+            id: compilePhaseContainer
+            objectName: "compilePhaseContainer"
+            preferredWidth: dimensions.playAreaWidth
+            preferredHeight: dimensions.screenHeight
+            visible: false
+            Container {
+                preferredWidth: dimensions.compileMapWidth
+                preferredHeight: dimensions.compileMapHeight
+                layout: DockLayout {}
+                
+                Button {
+                    text: "Start"
+                    opacity: 0.7
+                    verticalAlignment: VerticalAlignment.Center
+                    horizontalAlignment: HorizontalAlignment.Center
+                    onClicked: {
+                        compilePhaseContainer.setVisible(false);
+                        _app.compilePhaseDone();
+                    }
+                }
+            }
+            Container {
+                preferredWidth: dimensions.compileMapWidth
+                preferredHeight: dimensions.compileFunctionHeight
+                background: Color.Green
+            }
+        }
+        
+        Container {
+            id: menuContainer
+            objectName: "menuContainer"
+            preferredWidth: dimensions.screenWidth
+            preferredHeight: dimensions.screenHeight
+            background: Color.Black
+            layout: DockLayout {}
+            visible: false
+            
+            Container {
+                verticalAlignment: VerticalAlignment.Center
+                horizontalAlignment: HorizontalAlignment.Center
+                background: Color.Red
+                Label {
+                    text: "Paused"
+                    horizontalAlignment: HorizontalAlignment.Center
+                    textStyle.textAlign: TextAlign.Center
+                }
+                Button {
+                    horizontalAlignment: HorizontalAlignment.Center
+                    text: "Continue"
+                    onClicked: {
+                        menuContainer.setVisible(false);
+                        _app.unpause();
+                    }
+                }
+                Button {
+                    horizontalAlignment: HorizontalAlignment.Center
+                    text: "Menu"
+                    onClicked: {
+                        menuContainer.setVisible(false);
+                        _app.back();
+                    }
                 }
             }
         }
     }
+    
+    shortcuts: [
+        Shortcut {
+            key: "space"
+            onTriggered: {
+                _app.pause();
+                menuContainer.setVisible(true);
+            }
+        }
+    ]
 }

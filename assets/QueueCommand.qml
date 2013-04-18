@@ -4,16 +4,15 @@ Container {
     property variant dimensions: Dimensions {
     }
     property int index: 0
-    property alias text: label.text
+    property alias imageSource: view.imageSource
     verticalAlignment: VerticalAlignment.Center
     preferredWidth: dimensions.cmdWidth
     preferredHeight: dimensions.cmdHeight
     background: Color.Gray
     rightMargin: dimensions.queueItemPadding
 
-    Label {
-        id: label
-        text: "1"
+    ImageView {
+        id: view
     }
 
     gestureHandlers: [

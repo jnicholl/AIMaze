@@ -24,8 +24,11 @@ public:
 
 	bool positionAvailable(int x, int y);
 	void addRobotContainer(bb::cascades::Control *robot);
+	void resize(int width, int height);
 
 	float cellSize() const { return m_cellSize; }
+
+	Q_SLOT void parentHeightChanged(float parentHeight);
 
 private:
 	int m_rows;
@@ -33,6 +36,9 @@ private:
 	int *m_data;
 	float m_cellSize;
 	bb::cascades::Container *m_mapArea;
+
+	float m_mapWidth;
+	float m_mapHeight;
 };
 
 #endif /* MAP_H_ */

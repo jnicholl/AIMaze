@@ -36,6 +36,7 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 , m_queueCount(0)
 , m_map(0)
 , m_robot(0)
+, m_phase(COMPILE)
 {
 	// create scene document from main.qml asset
     // set parent to created document to ensure it exists for the whole application lifetime
@@ -57,6 +58,31 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 void ApplicationUI::back()
 {
 	m_navigationPane->pop();
+}
+
+// FIXME: Should really store the remaining time and start the next tick as much shorter.
+void ApplicationUI::pause()
+{
+	if (m_phase == RUN) {
+		m_timer.stop();
+		if (m_progressAnimation)
+			m_progressAnimation->stop();
+	}
+}
+
+void ApplicationUI::unpause()
+{
+	if (m_phase == RUN) {
+		m_timer.start();
+		if (m_progressAnimation && m_robot && !m_robot->finished())
+			m_progressAnimation->play();
+	}
+}
+
+void ApplicationUI::compilePhaseDone()
+{
+	m_phase = RUN;
+	unpause();
 }
 
 void ApplicationUI::setupLevel(const QVariantMap &levelData)
@@ -132,6 +158,10 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 		m_progressAnimation = m_gamePage->findChild<SequentialAnimation*>("progressAnimation");
 	}
 
+	m_phase = COMPILE;
+	Container *compileContainer = m_gamePage->findChild<Container*>("compilePhaseContainer");
+	compileContainer->setVisible(true);
+
 	QVariantMap levelInfo = m_levelList->dataModel()->data(indexPath).toMap();
 	QString levelPath = levelInfo["level"].toString();
 	JsonDataAccess jda;
@@ -151,63 +181,92 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 	m_navigationPane->push(m_gamePage);
 
 	m_timer.setInterval(2000);
-	m_timer.start();
 }
 
 void ApplicationUI::setQueueValue(int i, CommandType type)
 {
 	qDebug() << "Set " << i << " from " << m_queueCommands[i] << " to " << type;
 	m_queueCommands[i] = type;
-	QString text = "";
+	QString text = ""; // invalid URL indicates no image.
 	switch (type) {
 	case CMD_FORWARD:
-		text = "F";
+		text = "asset:///images/forward.png";
 		break;
 	case CMD_LEFT:
-		text = "L";
+		text = "asset:///images/left.png";
 		break;
 	case CMD_RIGHT:
-		text = "R";
+		text = "asset:///images/right.png";
+		break;
+	case CMD_F1:
+		text = "asset:///images/f1.png";
+		break;
+	case CMD_F2:
+		text = "asset:///images/f2.png";
+		break;
+	case CMD_F3:
+		text = "asset:///images/f3.png";
 		break;
 	case CMD_BLOCKED:
-		text = "X";
+		text = "";
 		break;
 	default:
 		break;
 	}
-	m_queue[i]->setProperty("text", text);
+	m_queue[i]->setProperty("imageSource", text);
 }
 
 void ApplicationUI::addQueuedCommand(CommandType type)
 {
 	if (type == CMD_EMPTY) return;
 
-	for (int i=0; i<QUEUE_LIMIT; i++) {
-		if (m_queueCommands[i] == CMD_EMPTY) {
-			setQueueValue(i, type);
-			m_queueCount++;
-			break;
+	if (m_phase == RUN) {
+		for (int i=0; i<QUEUE_LIMIT; i++) {
+			if (m_queueCommands[i] == CMD_EMPTY) {
+				setQueueValue(i, type);
+				m_queueCount++;
+				break;
+			}
 		}
+		// TODO: return failure to show user queue full?
+	} else if (m_phase == COMPILE) {
+
 	}
-	// TODO: return failure to show user queue full?
 }
 
 void ApplicationUI::tapForward()
 {
-	qDebug() << "tapForward";
 	addQueuedCommand(CMD_FORWARD);
 }
 
 void ApplicationUI::tapLeft()
 {
-	qDebug() << "tapLeft";
 	addQueuedCommand(CMD_LEFT);
 }
 
 void ApplicationUI::tapRight()
 {
-	qDebug() << "tapRight";
 	addQueuedCommand(CMD_RIGHT);
+}
+
+void ApplicationUI::tapF1()
+{
+	addQueuedCommand(CMD_F1);
+}
+
+void ApplicationUI::tapF2()
+{
+	addQueuedCommand(CMD_F2);
+}
+
+void ApplicationUI::tapF3()
+{
+	addQueuedCommand(CMD_F3);
+}
+
+void ApplicationUI::tapViewFunctions()
+{
+	// FIXME!
 }
 
 void ApplicationUI::removeQueuedCommand(int index)
@@ -237,6 +296,12 @@ void ApplicationUI::timerFired()
 		break;
 	case CMD_RIGHT:
 		m_robot->turnRight();
+		break;
+	case CMD_F1:
+		break;
+	case CMD_F2:
+		break;
+	case CMD_F3:
 		break;
 	default:
 		break;

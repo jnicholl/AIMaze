@@ -44,12 +44,18 @@ public:
     	CMD_FORWARD = 1,
     	CMD_LEFT = 2,
     	CMD_RIGHT = 3,
+    	CMD_F1 = 4,
+    	CMD_F2 = 5,
+    	CMD_F3 = 6,
     	CMD_BLOCKED = 255
     };
 
     void addQueuedCommand(CommandType type);
 
     Q_SLOT void back();
+    Q_SLOT void unpause();
+    Q_SLOT void pause();
+    Q_SLOT void compilePhaseDone();
 
     Q_SLOT void startLevel(const QVariantList &indexPath);
 
@@ -57,6 +63,10 @@ public:
     Q_SLOT void tapForward();
     Q_SLOT void tapLeft();
     Q_SLOT void tapRight();
+    Q_SLOT void tapF1();
+    Q_SLOT void tapF2();
+    Q_SLOT void tapF3();
+    Q_SLOT void tapViewFunctions();
 
     // Click on queued command
     Q_SLOT void removeQueuedCommand(int index);
@@ -87,6 +97,11 @@ private:
 
     Map *m_map;
     Robot *m_robot;
+
+    enum Phase {
+    	COMPILE,
+    	RUN
+    } m_phase;
 };
 
 #endif /* ApplicationUI_HPP_ */
