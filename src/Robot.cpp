@@ -9,8 +9,7 @@
 #include "Map.h"
 
 #include <bb/cascades/AbsoluteLayoutProperties>
-#include <bb/cascades/Container>
-#include <bb/cascades/Label>
+#include <bb/cascades/ImageView>
 
 using namespace bb::cascades;
 
@@ -22,17 +21,27 @@ Robot::Robot(Map *map, int x, int y, int ex, int ey, Direction d, QObject *paren
 	, m_endX(ex)
 	, m_endY(ey)
 	, m_map(map)
-	, m_container(0)
-	, m_label(0)
+	, m_image(0)
 {
 	const float cellSize = m_map->cellSize();
-	m_label = Label::create(Robot::directionToString(m_direction));
-	m_container = Container::create()
+	m_image = ImageView::create("asset:///images/robot.png")
 		.preferredSize(cellSize, cellSize)
-		.background(Color::fromRGBA(1, 0, 0, 1))
-		.layoutProperties(AbsoluteLayoutProperties::create().position(x * cellSize, y * cellSize))
-		.add(m_label);
-	m_map->addRobotContainer(m_container);
+		.layoutProperties(AbsoluteLayoutProperties::create().position(x * cellSize, y * cellSize));
+	m_map->addRobotContainer(m_image);
+	switch (m_direction) {
+	case LEFT:
+		draw(-90);
+		break;
+	case RIGHT:
+		draw(90);
+		break;
+	case DOWN:
+		draw(180);
+		break;
+	case UP:
+	default:
+		draw();
+	}
 }
 
 Robot::Direction Robot::getDirection(const QString &dirString)
@@ -68,19 +77,19 @@ void Robot::turnRight() {
 	switch (m_direction) {
 	case LEFT:
 		m_direction = UP;
-		draw();
+		draw(90);
 		break;
 	case UP:
 		m_direction = RIGHT;
-		draw();
+		draw(90);
 		break;
 	case RIGHT:
 		m_direction = DOWN;
-		draw();
+		draw(90);
 		break;
 	case DOWN:
 		m_direction = LEFT;
-		draw();
+		draw(90);
 		break;
 	default:
 		break;
@@ -91,19 +100,19 @@ void Robot::turnLeft() {
 	switch (m_direction) {
 	case LEFT:
 		m_direction = DOWN;
-		draw();
+		draw(-90);
 		break;
 	case DOWN:
 		m_direction = RIGHT;
-		draw();
+		draw(-90);
 		break;
 	case RIGHT:
 		m_direction = UP;
-		draw();
+		draw(-90);
 		break;
 	case UP:
 		m_direction = LEFT;
-		draw();
+		draw(-90);
 		break;
 	default:
 		break;
@@ -147,10 +156,11 @@ bool Robot::moveForward() {
 	return didMove;
 }
 
-void Robot::draw()
+void Robot::draw(float rotation)
 {
-	AbsoluteLayoutProperties *properties = qobject_cast<AbsoluteLayoutProperties*>(m_container->layoutProperties());
+	AbsoluteLayoutProperties *properties = qobject_cast<AbsoluteLayoutProperties*>(m_image->layoutProperties());
 	properties->setPositionX(m_x * m_map->cellSize());
 	properties->setPositionY(m_y * m_map->cellSize());
-	m_label->setText(directionToString(m_direction));
+
+	m_image->setRotationZ(m_image->rotationZ() + rotation);
 }

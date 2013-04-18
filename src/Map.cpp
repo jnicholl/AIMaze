@@ -12,10 +12,11 @@
 #include <bb/cascades/AbsoluteLayout>
 #include <bb/cascades/AbsoluteLayoutProperties>
 #include <bb/cascades/ColorPaint>
+#include <bb/cascades/ImageView>
 
 using namespace bb::cascades;
 
-Map::Map(int rows, int cols, int *data, Container *mapArea, QObject *parent)
+Map::Map(int rows, int cols, int endX, int endY, int *data, Container *mapArea, QObject *parent)
 	: QObject(parent)
 	, m_rows(rows)
 	, m_cols(cols)
@@ -34,15 +35,25 @@ Map::Map(int rows, int cols, int *data, Container *mapArea, QObject *parent)
 	m_mapArea->setHorizontalAlignment(HorizontalAlignment::Center);
 	m_mapArea->setVerticalAlignment(VerticalAlignment::Center);
 
-	// We know the size of each cell now, but we don't know the top left corner.
-	// FIXME: Center this.
+	QString emptyFloor("asset:///images/floortile.png");
+	QString goalFloor("asset:///images/goal.png");
 	for (int y=0; y<m_rows; y++) {
 		for (int x=0; x<m_cols; x++) {
-			Container *cell = Container::create()
-				.preferredSize(m_cellSize, m_cellSize)
-				.layoutProperties(AbsoluteLayoutProperties::create().position(x * m_cellSize, y * m_cellSize))
-				.add(Label::create(QString::number(m_data[y*m_rows+x])));
-			m_mapArea->add(cell);
+			if (positionAvailable(x,y)) {
+				ImageView *cell = ImageView::create()
+					.scalingMethod(ScalingMethod::Fill)
+					.preferredSize(m_cellSize, m_cellSize)
+					.layoutProperties(AbsoluteLayoutProperties::create().position(x * m_cellSize, y * m_cellSize));
+				if (x == endX && y == endY)
+					cell->setImageSource(goalFloor);
+				else
+					cell->setImageSource(emptyFloor);
+				m_mapArea->add(cell);
+			}
+//			Container *cell = Container::create()
+//				.preferredSize(m_cellSize, m_cellSize)
+//				.layoutProperties(AbsoluteLayoutProperties::create().position(x * m_cellSize, y * m_cellSize))
+//				.add(Label::create(QString::number(m_data[y*m_rows+x])));
 		}
 	}
 	mapArea->add(m_mapArea);
@@ -56,7 +67,7 @@ bool Map::positionAvailable(int x, int y)
 	return m_data[y * m_rows + x] == 1;
 }
 
-void Map::addRobotContainer(Container *robot)
+void Map::addRobotContainer(Control *robot)
 {
 	m_mapArea->add(robot);
 }

@@ -25,7 +25,7 @@ namespace bb {
 class Map;
 class Robot;
 
-#define QUEUE_LIMIT 8
+#define QUEUE_LIMIT 5
 
 /*!
  * @brief Application pane object

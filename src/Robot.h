@@ -14,6 +14,7 @@ namespace bb {
 	namespace cascades {
 		class Container;
 		class Label;
+		class ImageView;
 	}
 }
 
@@ -46,14 +47,15 @@ signals:
 	void moved(int x, int y);
 
 private:
-	void draw();
+	void draw(float rotation=0);
 
 	Direction m_direction;
 	int m_x, m_y;
 	int m_endX, m_endY;
 	Map* m_map;
-	bb::cascades::Container *m_container;
-	bb::cascades::Label *m_label;
+	bb::cascades::ImageView *m_image;
+//	bb::cascades::Container *m_container;
+//	bb::cascades::Label *m_label;
 };
 
 #endif /* ROBOT_H_ */

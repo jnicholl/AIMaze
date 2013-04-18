@@ -13,16 +13,17 @@
 namespace bb {
 	namespace cascades {
 		class Container;
+		class Control;
 	}
 }
 
 class Map: public QObject {
 	Q_OBJECT
 public:
-	Map(int rows, int cols, int *data, bb::cascades::Container *mapArea, QObject *parent = 0);
+	Map(int rows, int cols, int endX, int endY, int *data, bb::cascades::Container *mapArea, QObject *parent = 0);
 
 	bool positionAvailable(int x, int y);
-	void addRobotContainer(bb::cascades::Container *robot);
+	void addRobotContainer(bb::cascades::Control *robot);
 
 	float cellSize() const { return m_cellSize; }
 

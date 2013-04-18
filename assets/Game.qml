@@ -18,8 +18,9 @@ Page {
             }
             preferredWidth: dimensions.playAreaWidth
             preferredHeight: dimensions.playAreaHeight
-            background: Color.Green
-            layout: DockLayout {}
+            background: Color.Black
+            layout: DockLayout {
+            }
         }
 
         Container {
@@ -39,13 +40,13 @@ Page {
                 SequentialAnimation {
                     id: progressAnimation
                     objectName: "progressAnimation"
-	                TranslateTransition {
-	                    id: translateLeft
-	                    fromX: 0
-	                    toX: -dimensions.screenWidth
-	                    duration: 1900 // FIXME: Connect to app
-	                }
-	            }
+                    TranslateTransition {
+                        id: translateLeft
+                        fromX: 0
+                        toX: - dimensions.screenWidth
+                        duration: 1900 // FIXME: Connect to app
+                    }
+                }
             ]
         }
 
@@ -62,8 +63,20 @@ Page {
             preferredHeight: dimensions.queueHeight
             preferredWidth: dimensions.playAreaWidth
             leftPadding: dimensions.sidebarPadding
+
+            QueueCommand {
+            }
+            QueueCommand {
+            }
+            QueueCommand {
+            }
+            QueueCommand {
+            }
+            QueueCommand {
+            }
+
         }
-        
+
         Container {
             id: sidebar
             layoutProperties: AbsoluteLayoutProperties {
@@ -73,8 +86,8 @@ Page {
             preferredHeight: dimensions.screenHeight
             preferredWidth: dimensions.sidebarWidth
             background: Color.Blue
-            topPadding: dimensions.sidebarPadding
-            bottomPadding: dimensions.sidebarPadding
+            topPadding: dimensions.itemPadding
+            bottomPadding: dimensions.itemPadding
 
             Container {
                 id: cmdForward
@@ -82,7 +95,7 @@ Page {
                 preferredWidth: dimensions.cmdWidth
                 preferredHeight: dimensions.cmdHeight
                 background: Color.Gray
-                bottomMargin: dimensions.sidebarPadding
+                bottomMargin: dimensions.itemPadding
 
                 Label {
                     text: "F"
@@ -103,7 +116,7 @@ Page {
                 preferredWidth: dimensions.cmdWidth
                 preferredHeight: dimensions.cmdHeight
                 background: Color.Gray
-                bottomMargin: dimensions.sidebarPadding
+                bottomMargin: dimensions.itemPadding
 
                 Label {
                     text: "L"
@@ -124,7 +137,7 @@ Page {
                 preferredWidth: dimensions.cmdWidth
                 preferredHeight: dimensions.cmdHeight
                 background: Color.Gray
-                bottomMargin: dimensions.sidebarPadding
+                bottomMargin: dimensions.itemPadding
 
                 Label {
                     text: "R"
@@ -139,17 +152,26 @@ Page {
                 ]
             }
         }
-        Button {
+
+        Container {
+            id: menuButtonContainer
+            preferredWidth: dimensions.backButtonHeight * 3
+            preferredHeight: dimensions.queueHeight
             layoutProperties: AbsoluteLayoutProperties {
-                positionX: 0
-                positionY: dimensions.screenHeight - dimensions.backButtonHeight - dimensions.sidebarPadding
+                positionX: dimensions.playAreaWidth - menuButtonContainer.preferredWidth - dimensions.sidebarPadding
+                positionY: 0
             }
-            preferredWidth: dimensions.backButtonHeight*3
-            opacity: 0.5
-            text: "Back"
-            onClicked: {
-                _app.back();
+            layout: DockLayout{}
+
+            Button {
+                text: "Pause"
+                verticalAlignment: VerticalAlignment.Center
+                horizontalAlignment: HorizontalAlignment.Center
+                visible: dimensions.screenWidth > 1000
+                onClicked: {
+                    _app.back(); // FIXME: Menu
+                }
             }
         }
-    }   
+    }
 }

@@ -9,7 +9,7 @@ Container {
     preferredWidth: dimensions.cmdWidth
     preferredHeight: dimensions.cmdHeight
     background: Color.Gray
-    rightMargin: dimensions.sidebarPadding
+    rightMargin: dimensions.queueItemPadding
 
     Label {
         id: label

@@ -94,7 +94,7 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 		data[i] = mapData[i].toInt();
 	}
 
-	m_map = new Map(height, width, data, m_mapArea, this);
+	m_map = new Map(height, width, endX, endY, data, m_mapArea, this);
 	m_robot = new Robot(m_map, startX, startY, endX, endY, Robot::getDirection(direction), this);
 	QObject::connect(m_robot, SIGNAL(moved(int,int)), this, SLOT(robotMoved(int,int)));
 }
