@@ -97,7 +97,7 @@ void Map::parentHeightChanged(float parentHeight)
 		}
 	}
 
-	ImageView *robot = qobject_cast<ImageView*>(list[i]);
+	Container *robot = qobject_cast<Container*>(list[i]);
 	if (robot) {
 		robot->setPreferredSize(m_cellSize, m_cellSize);
 		AbsoluteLayoutProperties *properties = static_cast<AbsoluteLayoutProperties*>(robot->layoutProperties());

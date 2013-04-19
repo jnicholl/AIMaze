@@ -12,7 +12,9 @@
 #include <bb/data/JsonDataAccess>
 #include <bb/cascades/Container>
 #include <bb/cascades/Label>
+#include <bb/cascades/Button>
 #include <bb/cascades/SequentialAnimation>
+#include <bb/cascades/TapHandler>
 
 #include "map.h"
 #include "robot.h"
@@ -35,12 +37,18 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 , m_mapArea(0)
 , m_progressAnimation(0)
 , m_queueCount(0)
+, m_levelIndex(0)
+, m_levelAvailable(0)
 , m_map(0)
 , m_robot(0)
 , m_phase(COMPILE)
+, m_functionCount(0)
 , m_selectedFunction(0)
 , m_functionHeader(0)
+, m_shouldShowFunctions(false)
 {
+	loadSavedState();
+
 	// create scene document from main.qml asset
     // set parent to created document to ensure it exists for the whole application lifetime
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
@@ -56,6 +64,42 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
     app->setScene(m_navigationPane);
 
     QObject::connect(&m_timer, SIGNAL(timeout()), this, SLOT(timerFired()));
+}
+
+void ApplicationUI::loadSavedState()
+{
+	QString filePath(QDir::currentPath() + "/data/levelState.json");
+	if (QFile::exists(filePath)) {
+		JsonDataAccess jda;
+		QVariantMap state = jda.load(filePath).toMap();
+		if (jda.hasError())
+			return;
+		if (state.contains("levelAvailable")) {
+			int levelAvailable = state["levelAvailable"].toInt();
+			if (levelAvailable > 0) {
+				setLevelAvailable(levelAvailable);
+			}
+		}
+	}
+	qDebug() << "Level available" << m_levelAvailable;
+}
+
+void ApplicationUI::saveState()
+{
+	qDebug() << "saving state to " << QDir::currentPath() + "/data/levelState.json";
+	QVariantMap state;
+	state["levelAvailable"] = m_levelAvailable;
+	QFile file(QDir::currentPath() + "/data/levelState.json");
+	if (file.open(QIODevice::WriteOnly)) {
+		qDebug() << "opened file okay";
+		JsonDataAccess jda;
+		jda.save(state, &file);
+		if (jda.hasError()) {
+			qDebug("Failed to save: Json error\n");
+		} else {
+			qDebug("Saved");
+		}
+	}
 }
 
 void ApplicationUI::back()
@@ -84,6 +128,27 @@ void ApplicationUI::unpause()
 
 void ApplicationUI::compilePhaseDone()
 {
+	Container *container = 0;
+	for (int i=0; i<3; i++) {
+		for (int j=0; j<DEFAULT_FUNCTION_SIZE; j++) {
+			container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(i+1).arg(j+1));
+			if (container)
+				container->setVisible(false);
+			else
+				qDebug() << "No container at " << QString("func%1_act%2").arg(i+1).arg(j+1);
+		}
+	}
+	for (int i=0; i<m_functionCount; i++) {
+		Function *f = m_functions[i];
+		for (int j=0; j<f->commandCount(); j++) {
+			container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(i+1).arg(j + 1 + (DEFAULT_FUNCTION_SIZE - f->commandCount())));
+			if (container) {
+				container->setProperty("imageSource", getImageForCommand(f->at(j)));
+				container->setVisible(true);
+			} else
+				qDebug() << "No container at " << QString("func%1_act%2").arg(i+1).arg(j + 1 + (DEFAULT_FUNCTION_SIZE - f->commandCount()));
+		}
+	}
 	m_phase = RUN;
 	unpause();
 }
@@ -121,6 +186,7 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 	int endX = levelData["endX"].toInt();
 	int endY = levelData["endY"].toInt();
 	QVariantList mapData = levelData["data"].toList();
+	int moves = levelData["totalMoves"].toInt();
 
 	int functionCount = 3;
 	if (levelData.contains("numFunctions"))
@@ -152,7 +218,7 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 	}
 
 	m_map = new Map(height, width, endX, endY, data, m_mapArea, this);
-	m_robot = new Robot(m_map, startX, startY, endX, endY, Robot::getDirection(direction), this);
+	m_robot = new Robot(m_map, moves, startX, startY, endX, endY, Robot::getDirection(direction), this);
 
 	m_functionHeader = static_cast<Container *>(m_gamePage->findChild<Container*>("functionHeader"));
 	m_functionActions.clear();
@@ -202,9 +268,19 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 		m_progressAnimation = m_gamePage->findChild<SequentialAnimation*>("progressAnimation");
 	}
 
+	if (indexPath.count() > 0)
+		m_levelIndex = indexPath[0].toInt();
+	else
+		m_levelIndex = 0; // Uhoh?
+
 	m_phase = COMPILE;
+	setShouldShowFunctions(false);
 	Container *compileContainer = m_gamePage->findChild<Container*>("compilePhaseContainer");
 	compileContainer->setVisible(true);
+
+	m_gamePage->findChild<Label*>("menuTitle")->setText("Paused");
+	m_gamePage->findChild<Button*>("menuButton")->setText("Continue");
+	m_gamePage->findChild<Container*>("menuContainer")->setVisible(false);
 
 	QVariantMap levelInfo = m_levelList->dataModel()->data(indexPath).toMap();
 	QString levelPath = levelInfo["level"].toString();
@@ -363,7 +439,7 @@ void ApplicationUI::tapF3()
 
 void ApplicationUI::tapViewFunctions()
 {
-	// FIXME!
+	setShouldShowFunctions(!m_shouldShowFunctions);
 }
 
 void ApplicationUI::removeQueuedCommand(int index)
@@ -390,23 +466,23 @@ void ApplicationUI::removeFunctionCommand(int index)
 
 void ApplicationUI::timerFired()
 {
-	qDebug() << "Timer fired";
 	FunctionRunner *frame = 0;
 	bool shouldRemove = true;
+	bool countsAsMove = true;
 	CommandType cmd = m_queueCommands[0];
 
-	qDebug() << "Stack empty?";
+	if (m_robot->hasNoPower(!m_stack.empty())) {
+		qDebug("Unexpectedly has no power on timer fire?");
+		pause();
+		return;
+	}
+
 	if (!m_stack.empty()) {
-		qDebug() << "No";
 		frame = m_stack.top();
 		while (frame->finished()) {
-			qDebug() << "Frame finished";
 			frame = m_stack.pop();
-			qDebug() << "Deleting";
 			delete frame;
-			qDebug() << "Deleted";
 			if (m_stack.empty()) {
-				qDebug() << "Stack really empty";
 				// Finished all function calls, remove the function on the queue
 				removeQueuedCommand(0);
 				cmd = m_queueCommands[0];
@@ -416,12 +492,12 @@ void ApplicationUI::timerFired()
 		}
 
 		if (!m_stack.empty()) {
-			qDebug() << "Stack not empty";
 			cmd = frame->step();
-			shouldRemove = false; // FIXME: We should really leave the currently executing function in the queue.
+			countsAsMove = false;
+			shouldRemove = false;
 		}
 
-		frame = 0;
+		frame = 0; // We re-use this later if the command was a function call.
 	}
 
 	qDebug() << "Cmd: " << cmd;
@@ -437,14 +513,17 @@ void ApplicationUI::timerFired()
 		break;
 	case CMD_F1:
 		frame = new FunctionRunner(m_functions[0]);
+		countsAsMove = true;
 		shouldRemove = false;
 		break;
 	case CMD_F2:
 		frame = new FunctionRunner(m_functions[1]);
+		countsAsMove = true;
 		shouldRemove = false;
 		break;
 	case CMD_F3:
 		frame = new FunctionRunner(m_functions[2]);
+		countsAsMove = true;
 		shouldRemove = false;
 		break;
 	default:
@@ -458,8 +537,54 @@ void ApplicationUI::timerFired()
 	if (shouldRemove)
 		removeQueuedCommand(0);
 
+	if (countsAsMove) {
+		m_robot->decrementMoves();
+		if (m_robot->hasNoPower(!m_stack.empty())) {
+			processFinish(m_robot->finished());
+			return;
+		}
+	}
+
 	if (!m_robot->finished())
 		m_progressAnimation->play();
+	else
+		processFinish(true);
+}
+
+void ApplicationUI::clickMenuButton()
+{
+	if (m_phase == FINISHED) {
+		if (m_robot->finished()) {
+			nextLevel();
+		} else {
+			retry();
+		}
+	} else {
+		// Just entered pause menu from game
+		unpause();
+	}
+}
+
+void ApplicationUI::processFinish(bool win)
+{
+	pause();
+	m_phase = FINISHED;
+	QString text, buttonText;
+	if (win) {
+		text = "You won";
+		buttonText = "Next level";
+		qDebug("Level available: %d, levelIndex = %d\n", m_levelAvailable, m_levelIndex);
+		if (m_levelAvailable <= m_levelIndex) {
+			setLevelAvailable(m_levelIndex+1);
+			saveState();
+		}
+	} else {
+		text = "You lost";
+		buttonText = "Retry";
+	}
+	m_gamePage->findChild<Label*>("menuTitle")->setText(text);
+	m_gamePage->findChild<Button*>("menuButton")->setText(buttonText);
+	m_gamePage->findChild<Container*>("menuContainer")->setVisible(true); // FIXME: need to reset labels
 }
 
 void ApplicationUI::robotMoved(int x, int y)
@@ -470,4 +595,23 @@ void ApplicationUI::robotMoved(int x, int y)
 		qDebug() << "Finished";
 		m_timer.stop();
 	}
+}
+
+void ApplicationUI::nextLevel()
+{
+	int levelCount = m_levelList->dataModel()->childCount(QVariantList());
+	if (m_levelIndex >= levelCount-1) {
+		back();
+	} else {
+		QVariantList indexPath;
+		indexPath.append(m_levelIndex+1);
+		startLevel(indexPath);
+	}
+}
+
+void ApplicationUI::retry()
+{
+	QVariantList indexPath;
+	indexPath.append(m_levelIndex);
+	startLevel(indexPath);
 }

@@ -3,6 +3,8 @@ import bb.cascades 1.0
 
 // Item used by the list to present a small thumbnail image with text.
 Container {
+    id: listItem
+    property int lastAvailableIndex
     layout: DockLayout {
     }
     Container {
@@ -16,7 +18,6 @@ Container {
         layout: DockLayout {}
         verticalAlignment: VerticalAlignment.Fill
         horizontalAlignment: HorizontalAlignment.Fill
-        background: Color.Red
         preferredWidth: 240
         preferredHeight: 240
         // and text below
@@ -29,7 +30,7 @@ Container {
         Label {
             horizontalAlignment: HorizontalAlignment.Center
             verticalAlignment: VerticalAlignment.Center
-            text: ListItemData.text
+            text: (listItem.ListItem.indexInSection > lastAvailableIndex)? "X" : ListItemData.text
             textStyle.base: SystemDefaults.TextStyles.BigText
             textStyle.textAlign: TextAlign.Center
         }

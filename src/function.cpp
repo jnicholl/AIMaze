@@ -8,6 +8,7 @@
 #include "function.h"
 
 Function::Function(int size)
+	: m_commandCount(0)
 {
 	for (int i = 0; i < size; i++) {
 		m_commands.append(ApplicationUI::CMD_EMPTY);
@@ -25,6 +26,8 @@ ApplicationUI::CommandType Function::operator[](int index) {
 void Function::append(ApplicationUI::CommandType cmd) {
 	for (int i = 0; i < count(); i++) {
 		if (m_commands[i] == ApplicationUI::CMD_EMPTY) {
+			if (cmd != ApplicationUI::CMD_EMPTY)
+				m_commandCount++;
 			m_commands[i] = cmd;
 			break;
 		}
@@ -42,4 +45,5 @@ void Function::remove(int index) {
 	}
 
 	m_commands[m_commands.count() - 1] = ApplicationUI::CMD_EMPTY;
+	m_commandCount--;
 }

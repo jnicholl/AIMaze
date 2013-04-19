@@ -27,7 +27,7 @@ public:
 		LEFT, UP, RIGHT, DOWN,
 	};
 
-	Robot(Map *map, int x = 0, int y = 0, int ex = 0, int ey = 0, Direction d = UP, QObject *parent = 0);
+	Robot(Map *map, int moves, int x = 0, int y = 0, int ex = 0, int ey = 0, Direction d = UP, QObject *parent = 0);
 
 	static Direction getDirection(const QString &dirString);
 	static const QString directionToString(Robot::Direction dir);
@@ -41,6 +41,10 @@ public:
 	int endX() const { return m_endX; }
 	int endY() const { return m_endY; }
 
+	int moves() const { return m_moves; }
+	bool hasNoPower(bool inFunction) const { return m_moves <= (inFunction?-1:0); }
+	void decrementMoves();
+
 	bool finished() const { return m_x == m_endX && m_y == m_endY; }
 
 signals:
@@ -53,9 +57,10 @@ private:
 	int m_x, m_y;
 	int m_endX, m_endY;
 	Map* m_map;
+	int m_moves;
 	bb::cascades::ImageView *m_image;
-//	bb::cascades::Container *m_container;
-//	bb::cascades::Label *m_label;
+	bb::cascades::Container *m_container;
+	bb::cascades::Label *m_label;
 };
 
 #endif /* ROBOT_H_ */

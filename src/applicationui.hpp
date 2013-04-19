@@ -39,6 +39,8 @@ class ApplicationUI : public QObject
     Q_OBJECT
 
     Q_PROPERTY(int functionCount READ functionCount NOTIFY functionCountChanged)
+    Q_PROPERTY(int levelAvailable READ levelAvailable NOTIFY levelAvailableChanged)
+    Q_PROPERTY(bool showFunctions READ shouldShowFunctions NOTIFY showFunctionsChanged)
 
 public:
     ApplicationUI(bb::cascades::Application *app);
@@ -61,6 +63,10 @@ public:
     Q_SLOT void unpause();
     Q_SLOT void pause();
     Q_SLOT void compilePhaseDone();
+
+    Q_SLOT void nextLevel();
+    Q_SLOT void retry();
+    Q_SLOT void clickMenuButton();
 
     Q_SLOT void startLevel(const QVariantList &indexPath);
 
@@ -90,18 +96,40 @@ public:
     void setFunctionCount(int count) {
     	if (count != m_functionCount) {
     		m_functionCount = count;
-    		functionCountChanged(m_functionCount);
+    		emit functionCountChanged(m_functionCount);
+    	}
+    }
+
+    int levelAvailable() const { return m_levelAvailable; }
+    void setLevelAvailable(int available) {
+    	if (available != m_levelAvailable) {
+    		m_levelAvailable = available;
+    		emit levelAvailableChanged(m_levelAvailable);
+    	}
+    }
+
+    bool shouldShowFunctions() const { return m_shouldShowFunctions; }
+    void setShouldShowFunctions(bool val) {
+    	if (val != m_shouldShowFunctions) {
+    		m_shouldShowFunctions = val;
+    		emit showFunctionsChanged(m_shouldShowFunctions);
     	}
     }
 
 signals:
 	void functionCountChanged(int);
+	void levelAvailableChanged(int);
+	void showFunctionsChanged(bool);
 
 private:
+	void loadSavedState();
+	void saveState();
+
     void setQueueValue(int i, CommandType type);
     void setupQueue();
 
     void setupLevel(const QVariantMap &levelData);
+    void processFinish(bool win);
 
     static QString getImageForCommand(CommandType type);
 
@@ -119,19 +147,25 @@ private:
     QList<bb::cascades::Container*> m_queue;
     QTimer m_timer;
 
+    int m_levelIndex;
+    int m_levelAvailable;
     Map *m_map;
     Robot *m_robot;
 
     enum Phase {
     	COMPILE,
-    	RUN
+    	RUN,
+    	FINISHED
     } m_phase;
 
+    int m_movesRemaining;
     int m_functionCount;
     QList<Function*> m_functions;
     int m_selectedFunction;
     bb::cascades::Container *m_functionHeader;
     QList<bb::cascades::Container*> m_functionActions;
+
+    bool m_shouldShowFunctions;
 
     QStack<FunctionRunner*> m_stack;
 };

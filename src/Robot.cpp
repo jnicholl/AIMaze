@@ -9,11 +9,14 @@
 #include "Map.h"
 
 #include <bb/cascades/AbsoluteLayoutProperties>
+#include <bb/cascades/Container>
 #include <bb/cascades/ImageView>
+#include <bb/cascades/Label>
+#include <bb/cascades/layouts/docklayout.h>
 
 using namespace bb::cascades;
 
-Robot::Robot(Map *map, int x, int y, int ex, int ey, Direction d, QObject *parent)
+Robot::Robot(Map *map, int moves, int x, int y, int ex, int ey, Direction d, QObject *parent)
 	: QObject(parent)
 	, m_direction(d)
 	, m_x(x)
@@ -21,13 +24,23 @@ Robot::Robot(Map *map, int x, int y, int ex, int ey, Direction d, QObject *paren
 	, m_endX(ex)
 	, m_endY(ey)
 	, m_map(map)
+	, m_moves(moves)
 	, m_image(0)
 {
 	const float cellSize = m_map->cellSize();
-	m_image = ImageView::create("asset:///images/robot.png")
+	m_container = Container::create()
 		.preferredSize(cellSize, cellSize)
-		.layoutProperties(AbsoluteLayoutProperties::create().position(x * cellSize, y * cellSize));
-	m_map->addRobotContainer(m_image);
+		.layoutProperties(AbsoluteLayoutProperties::create().position(x * cellSize, y * cellSize))
+		.layout(DockLayout::create());
+	m_image = ImageView::create("asset:///images/robot.png")
+		.preferredSize(cellSize, cellSize);
+	m_label = Label::create(QString::number(moves));
+	m_label->setHorizontalAlignment(HorizontalAlignment::Center);
+	m_label->setVerticalAlignment(VerticalAlignment::Center);
+
+	m_container->add(m_image);
+	m_container->add(m_label);
+	m_map->addRobotContainer(m_container);
 	switch (m_direction) {
 	case LEFT:
 		draw(-90);
@@ -41,6 +54,7 @@ Robot::Robot(Map *map, int x, int y, int ex, int ey, Direction d, QObject *paren
 	case UP:
 	default:
 		draw();
+		break;
 	}
 }
 
@@ -158,9 +172,16 @@ bool Robot::moveForward() {
 
 void Robot::draw(float rotation)
 {
-	AbsoluteLayoutProperties *properties = qobject_cast<AbsoluteLayoutProperties*>(m_image->layoutProperties());
+	AbsoluteLayoutProperties *properties = qobject_cast<AbsoluteLayoutProperties*>(m_container->layoutProperties());
 	properties->setPositionX(m_x * m_map->cellSize());
 	properties->setPositionY(m_y * m_map->cellSize());
 
 	m_image->setRotationZ(m_image->rotationZ() + rotation);
+}
+
+void Robot::decrementMoves()
+{
+	m_moves--;
+	int displayMoves = std::max(m_moves, 0);
+	m_label->setText(QString::number(displayMoves));
 }

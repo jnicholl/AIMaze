@@ -24,6 +24,132 @@ Page {
         }
 
         Container {
+            id: functionSlideoutContainer
+            layoutProperties: AbsoluteLayoutProperties {
+                positionX: 0
+                positionY: 0
+            }
+            preferredHeight: dimensions.screenHeight
+            preferredWidth: dimensions.playAreaWidth
+            topPadding: dimensions.itemPadding
+            bottomPadding: dimensions.itemPadding
+
+            Container { // at forward button
+                horizontalAlignment: HorizontalAlignment.Right
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: cmdForward.visible
+            }
+
+            Container { // at left button
+                horizontalAlignment: HorizontalAlignment.Right
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: cmdLeft.visible
+            }
+
+            Container { // at right button
+                horizontalAlignment: HorizontalAlignment.Right
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: cmdRight.visible
+            }
+
+            Container { // at F1 button
+                horizontalAlignment: HorizontalAlignment.Right
+                preferredWidth: dimensions.cmdWidth * 3
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: _app.showFunctions && cmdF1.visible
+                layout: StackLayout {
+                    orientation: LayoutOrientation.RightToLeft
+                }
+                SlideoutCommand {
+                    objectName: "func1_act1"
+                }
+                SlideoutCommand {
+                    objectName: "func1_act2"
+                }
+                SlideoutCommand {
+                    objectName: "func1_act3"
+                }
+                SlideoutCommand {
+                    objectName: "func1_act4"
+                }
+                SlideoutCommand {
+                    objectName: "func1_act5"
+                }
+                SlideoutCommand {
+                    objectName: "func1_act6"
+                }
+                SlideoutCommand {
+                    objectName: "func1_act7"
+                }
+            }
+
+            Container { // at F2 button
+                horizontalAlignment: HorizontalAlignment.Right
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: _app.showFunction && cmdF2.visible
+                SlideoutCommand {
+                    objectName: "func2_act1"
+                }
+                SlideoutCommand {
+                    objectName: "func2_act2"
+                }
+                SlideoutCommand {
+                    objectName: "func2_act3"
+                }
+                SlideoutCommand {
+                    objectName: "func2_act4"
+                }
+                SlideoutCommand {
+                    objectName: "func2_act5"
+                }
+                SlideoutCommand {
+                    objectName: "func2_act6"
+                }
+                SlideoutCommand {
+                    objectName: "func2_act7"
+                }
+            }
+
+            Container { // at F3 button
+                horizontalAlignment: HorizontalAlignment.Right
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: _app.showFunction && cmdF3.visible
+                SlideoutCommand {
+                    objectName: "func3_act1"
+                }
+                SlideoutCommand {
+                    objectName: "func3_act2"
+                }
+                SlideoutCommand {
+                    objectName: "func3_act3"
+                }
+                SlideoutCommand {
+                    objectName: "func3_act4"
+                }
+                SlideoutCommand {
+                    objectName: "func3_act5"
+                }
+                SlideoutCommand {
+                    objectName: "func3_act6"
+                }
+                SlideoutCommand {
+                    objectName: "func3_act7"
+                }
+            }
+        }
+
+        Container {
             id: queueUniverse
             objectName: "queueUniverse"
             layoutProperties: AbsoluteLayoutProperties {
@@ -251,67 +377,6 @@ Page {
         }
 
         Container {
-            id: functionSlideoutContainer
-            layoutProperties: AbsoluteLayoutProperties {
-                positionX: 0
-                positionY: 0
-            }
-            preferredHeight: dimensions.screenHeight
-            preferredWidth: dimensions.sidebarWidth
-            topPadding: dimensions.itemPadding
-            bottomPadding: dimensions.itemPadding
-            visible: false
-            
-            Container { // at forward button
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                bottomMargin: dimensions.itemPadding
-                visible: cmdForward.visible
-            }
-
-            Container { // at left button
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                bottomMargin: dimensions.itemPadding
-                visible: cmdLeft.visible
-            }
-
-            Container { // at right button
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                bottomMargin: dimensions.itemPadding
-                visible: cmdRight.visible
-            }
-
-            Container { // at F1 button
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                bottomMargin: dimensions.itemPadding
-                visible: _app.showFunctions && cmdF1.visible
-            }
-
-            Container { // at F2 button
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                bottomMargin: dimensions.itemPadding
-                visible: _app.showFunction && cmdF2.visible
-            }
-
-            Container { // at F3 button
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                bottomMargin: dimensions.itemPadding
-                visible: _app.showFunction && cmdF3.visible
-            }
-        }
-
-        Container {
             id: menuButtonContainer
             preferredWidth: dimensions.backButtonHeight * 3
             preferredHeight: dimensions.queueHeight
@@ -501,16 +566,18 @@ Page {
                 horizontalAlignment: HorizontalAlignment.Center
                 background: Color.Red
                 Label {
+                    objectName: "menuTitle"
                     text: "Paused"
                     horizontalAlignment: HorizontalAlignment.Center
                     textStyle.textAlign: TextAlign.Center
                 }
                 Button {
+                    objectName: "menuButton"
                     horizontalAlignment: HorizontalAlignment.Center
                     text: "Continue"
                     onClicked: {
                         menuContainer.setVisible(false);
-                        _app.unpause();
+                        _app.clickMenuButton();                      
                     }
                 }
                 Button {

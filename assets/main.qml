@@ -5,6 +5,7 @@ NavigationPane {
     id: navigationPane
     peekEnabled: false
     backButtonsVisible: false
+    
     firstPage: Page {
         id: pgMain
         content: Container {
@@ -18,6 +19,7 @@ NavigationPane {
                 id: listView
                 // set object name to let listView to be discoverable from C++
                 objectName: "listView"
+                property int levelAvailable: _app.levelAvailable
                 layout: GridListLayout {
                 }
                 dataModel: XmlDataModel {
@@ -28,12 +30,14 @@ NavigationPane {
                     ListItemComponent {
                         type: "item"
                         LevelListItem {
+                            lastAvailableIndex: ListItem.view.levelAvailable
                         }
                     }
                 ]
                 onTriggered: {
                     console.log("selected_index: " + indexPath)
-                    _app.startLevel(indexPath);
+                    if (indexPath <= levelAvailable)
+                        _app.startLevel(indexPath);
                 }
                 horizontalAlignment: HorizontalAlignment.Fill
                 layoutProperties: StackLayoutProperties {

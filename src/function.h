@@ -18,7 +18,9 @@ class Function {
 public:
 	Function(int size=DEFAULT_FUNCTION_SIZE);
 
+	// Number of actions (including empty ones)
 	int count() const;
+	int commandCount() const { return m_commandCount; }
 	ApplicationUI::CommandType operator[](int index);
 	ApplicationUI::CommandType at(int index) const { return m_commands[index]; }
 
@@ -28,6 +30,7 @@ public:
 
 private:
 	QList<ApplicationUI::CommandType> m_commands;
+	int m_commandCount; // number of non-empty actions
 };
 
 class FunctionRunner {
@@ -39,7 +42,7 @@ public:
 
 	ApplicationUI::CommandType step() {
 		ApplicationUI::CommandType ret = ApplicationUI::CMD_EMPTY;
-		if (m_pos < m_function->count()) {
+		if (m_pos < m_function->commandCount()) {
 			ret = m_function->at(m_pos);
 			m_pos++;
 		}
@@ -47,7 +50,7 @@ public:
 	}
 
 	bool finished() {
-		return m_pos >= m_function->count();
+		return m_pos >= m_function->commandCount();
 	}
 
 private:
