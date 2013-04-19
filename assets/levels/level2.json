@@ -1,14 +1,15 @@
-{
-"width":4,
-"height":4,
-"startX":0,
-"startY":3,
-"startDir":"up",
-"endX":3,
-"endY":0,
-"data":
-	[0, 0, 1, 1,
-	0, 0, 1, 0,
-	1, 1, 1, 0,
-	1, 0, 0, 0]
+{ 
+"width": 3, 
+"height": 3, 
+"startX": 0, 
+"startY": 0, 
+"startDir": "right", 
+"endX": 2, 
+"endY": 2, 
+"data": [1, 1, 1, 
+		0, 1, 0, 
+		1, 1, 1],
+"numFunctions": 1, 
+"functionLimit": [3],
+"totalMoves": 4
 }

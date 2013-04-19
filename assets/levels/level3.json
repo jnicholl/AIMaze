@@ -1,14 +1,16 @@
 { 
-"width": 5, 
-"height": 5, 
+"width": 4, 
+"height": 4, 
 "startX": 0, 
 "startY": 0, 
-"startDir": "up", 
-"endX": 3, 
-"endY": 0, 
-"data": [1, 0, 1, 1, 1,
-		1, 0, 1, 0, 0,
-		1, 0, 1, 1, 1,
-		1, 0, 1, 0, 1,
-		1, 1, 1, 1, 1]
+"startDir": "right", 
+"endX": 0, 
+"endY": 3, 
+"data": [1, 1, 1, 1, 
+		0, 0, 0, 1, 
+		0, 0, 0, 1, 
+		1, 1, 1, 1],
+"numFunctions": 2, 
+"functionLimit": [5, 3],
+"totalMoves": 4
 }

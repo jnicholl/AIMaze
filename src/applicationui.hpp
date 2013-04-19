@@ -24,6 +24,8 @@ namespace bb {
 
 class Map;
 class Robot;
+class Function;
+class FunctionRunner;
 
 #define QUEUE_LIMIT 5
 
@@ -35,6 +37,9 @@ class Robot;
 class ApplicationUI : public QObject
 {
     Q_OBJECT
+
+    Q_PROPERTY(int functionCount READ functionCount NOTIFY functionCountChanged)
+
 public:
     ApplicationUI(bb::cascades::Application *app);
     virtual ~ApplicationUI() {}
@@ -71,15 +76,34 @@ public:
     // Click on queued command
     Q_SLOT void removeQueuedCommand(int index);
 
+    // Click on function command (to remove it)
+    Q_SLOT void removeFunctionCommand(int index);
+    Q_SLOT void selectNextFunction();
+
     Q_SLOT void timerFired();
 
     Q_SLOT void robotMoved(int x, int y);
+
+    void drawSelectedFunction();
+
+    int functionCount() const { return m_functionCount; }
+    void setFunctionCount(int count) {
+    	if (count != m_functionCount) {
+    		m_functionCount = count;
+    		functionCountChanged(m_functionCount);
+    	}
+    }
+
+signals:
+	void functionCountChanged(int);
 
 private:
     void setQueueValue(int i, CommandType type);
     void setupQueue();
 
     void setupLevel(const QVariantMap &levelData);
+
+    static QString getImageForCommand(CommandType type);
 
     bb::cascades::ListView *m_levelList;
     bb::cascades::Page *m_gamePage;
@@ -102,6 +126,14 @@ private:
     	COMPILE,
     	RUN
     } m_phase;
+
+    int m_functionCount;
+    QList<Function*> m_functions;
+    int m_selectedFunction;
+    bb::cascades::Container *m_functionHeader;
+    QList<bb::cascades::Container*> m_functionActions;
+
+    QStack<FunctionRunner*> m_stack;
 };
 
 #endif /* ApplicationUI_HPP_ */

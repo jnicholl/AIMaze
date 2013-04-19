@@ -9,7 +9,7 @@ Page {
         background: Color.Black
         layout: AbsoluteLayout {
         }
-        
+
         Container {
             id: mapArea
             objectName: "mapArea"
@@ -22,7 +22,7 @@ Page {
             layout: DockLayout {
             }
         }
-        
+
         Container {
             id: queueUniverse
             objectName: "queueUniverse"
@@ -32,58 +32,58 @@ Page {
             }
             preferredHeight: dimensions.queueHeight
             preferredWidth: dimensions.screenWidth
-            visible: !compilePhaseContainer.visible
+            visible: ! compilePhaseContainer.visible
             layout: AbsoluteLayout {
             }
             ImageView {
-	            id: progressBarBackground
-	            layoutProperties: AbsoluteLayoutProperties {
-	                positionX: 0
-	                positionY: 0
-	            }
-	            preferredHeight: dimensions.queueHeight
-	            preferredWidth: dimensions.screenWidth
-	            imageSource: "asset:///images/queue-glow.amd"
-	        }
-	
-	        Container {
-	            id: progressBar
-	            layoutProperties: AbsoluteLayoutProperties {
-	                positionX: 0
-	                positionY: 0
-	            }
-	            preferredHeight: dimensions.queueHeight
-	            preferredWidth: dimensions.screenWidth
-	            background: Color.Black
-	            opacity: 0.7
-	            animations: [
-	                SequentialAnimation {
-	                    id: progressAnimation
-	                    objectName: "progressAnimation"
-	                    TranslateTransition {
-	                        id: translateLeft
-	                        fromX: 0
-	                        toX: - dimensions.screenWidth
-	                        duration: 1900 // FIXME: Connect duration to app timer
-	                    }
-	                }
-	            ]
-	        }
-	
-	        Container {
-	            id: queueContainer
-	            objectName: "queueContainer"
-	            layoutProperties: AbsoluteLayoutProperties {
-	                positionX: 0
-	                positionY: 0
-	            }
-	            layout: StackLayout {
-	                orientation: LayoutOrientation.LeftToRight
-	            }
-	            preferredHeight: dimensions.queueHeight
-	            preferredWidth: dimensions.playAreaWidth
-	            leftPadding: dimensions.sidebarPadding
-	        }
+                id: progressBarBackground
+                layoutProperties: AbsoluteLayoutProperties {
+                    positionX: 0
+                    positionY: 0
+                }
+                preferredHeight: dimensions.queueHeight
+                preferredWidth: dimensions.screenWidth
+                imageSource: "asset:///images/queue-glow.amd"
+            }
+
+            Container {
+                id: progressBar
+                layoutProperties: AbsoluteLayoutProperties {
+                    positionX: 0
+                    positionY: 0
+                }
+                preferredHeight: dimensions.queueHeight
+                preferredWidth: dimensions.screenWidth
+                background: Color.Black
+                opacity: 0.7
+                animations: [
+                    SequentialAnimation {
+                        id: progressAnimation
+                        objectName: "progressAnimation"
+                        TranslateTransition {
+                            id: translateLeft
+                            fromX: 0
+                            toX: - dimensions.screenWidth
+                            duration: 1900 // FIXME: Connect duration to app timer
+                        }
+                    }
+                ]
+            }
+
+            Container {
+                id: queueContainer
+                objectName: "queueContainer"
+                layoutProperties: AbsoluteLayoutProperties {
+                    positionX: 0
+                    positionY: 0
+                }
+                layout: StackLayout {
+                    orientation: LayoutOrientation.LeftToRight
+                }
+                preferredHeight: dimensions.queueHeight
+                preferredWidth: dimensions.playAreaWidth
+                leftPadding: dimensions.sidebarPadding
+            }
         }
 
         Container {
@@ -168,6 +168,7 @@ Page {
                 preferredHeight: dimensions.cmdHeight
                 background: Color.Black
                 bottomMargin: dimensions.itemPadding
+                visible: _app.functionCount > 0
 
                 ImageView {
                     imageSource: "asset:///images/f1.png"
@@ -189,6 +190,7 @@ Page {
                 preferredHeight: dimensions.cmdHeight
                 background: Color.Black
                 bottomMargin: dimensions.itemPadding
+                visible: _app.functionCount > 1
 
                 ImageView {
                     imageSource: "asset:///images/f2.png"
@@ -210,6 +212,7 @@ Page {
                 preferredHeight: dimensions.cmdHeight
                 background: Color.Black
                 bottomMargin: dimensions.itemPadding
+                visible: _app.functionCount > 2
 
                 ImageView {
                     imageSource: "asset:///images/f3.png"
@@ -223,7 +226,7 @@ Page {
                     }
                 ]
             }
-            
+
             Container {
                 id: cmdViewFunctions
                 horizontalAlignment: HorizontalAlignment.Center
@@ -231,8 +234,8 @@ Page {
                 preferredHeight: dimensions.cmdHeight
                 background: Color.Black
                 bottomMargin: dimensions.itemPadding
-                visible: compilePhaseContainer.visible == false
-                
+                visible: _app.functionCount > 0 && compilePhaseContainer.visible == false
+
                 ImageView {
                     imageSource: "asset:///images/viewfunctions.png"
                 }
@@ -248,6 +251,67 @@ Page {
         }
 
         Container {
+            id: functionSlideoutContainer
+            layoutProperties: AbsoluteLayoutProperties {
+                positionX: 0
+                positionY: 0
+            }
+            preferredHeight: dimensions.screenHeight
+            preferredWidth: dimensions.sidebarWidth
+            topPadding: dimensions.itemPadding
+            bottomPadding: dimensions.itemPadding
+            visible: false
+            
+            Container { // at forward button
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: cmdForward.visible
+            }
+
+            Container { // at left button
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: cmdLeft.visible
+            }
+
+            Container { // at right button
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: cmdRight.visible
+            }
+
+            Container { // at F1 button
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: _app.showFunctions && cmdF1.visible
+            }
+
+            Container { // at F2 button
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: _app.showFunction && cmdF2.visible
+            }
+
+            Container { // at F3 button
+                horizontalAlignment: HorizontalAlignment.Center
+                preferredWidth: dimensions.cmdWidth
+                preferredHeight: dimensions.cmdHeight
+                bottomMargin: dimensions.itemPadding
+                visible: _app.showFunction && cmdF3.visible
+            }
+        }
+
+        Container {
             id: menuButtonContainer
             preferredWidth: dimensions.backButtonHeight * 3
             preferredHeight: dimensions.queueHeight
@@ -255,33 +319,33 @@ Page {
                 positionX: dimensions.playAreaWidth - menuButtonContainer.preferredWidth - dimensions.sidebarPadding
                 positionY: 0
             }
-            layout: DockLayout{}
+            layout: DockLayout {
+            }
 
             Button {
                 text: "Pause"
                 verticalAlignment: VerticalAlignment.Center
                 horizontalAlignment: HorizontalAlignment.Center
-                visible: dimensions.screenWidth > 1000 
-                    && compilePhaseContainer.visible == false 
-                    && menuContainer.visible == false
+                visible: dimensions.screenWidth > 1000 && compilePhaseContainer.visible == false && menuContainer.visible == false
                 onClicked: {
                     _app.pause();
                     menuContainer.setVisible(true);
                 }
             }
         }
-        
+
         Container {
             id: compilePhaseContainer
             objectName: "compilePhaseContainer"
             preferredWidth: dimensions.playAreaWidth
             preferredHeight: dimensions.screenHeight
-            visible: false
+
             Container {
                 preferredWidth: dimensions.compileMapWidth
                 preferredHeight: dimensions.compileMapHeight
-                layout: DockLayout {}
-                
+                layout: DockLayout {
+                }
+
                 Button {
                     text: "Start"
                     opacity: 0.7
@@ -294,21 +358,144 @@ Page {
                 }
             }
             Container {
+                objectName: "compileFunctionContainer"
                 preferredWidth: dimensions.compileMapWidth
                 preferredHeight: dimensions.compileFunctionHeight
                 background: Color.Green
+                layout: DockLayout {
+                }
+
+                Container {
+                    verticalAlignment: VerticalAlignment.Center
+                    horizontalAlignment: HorizontalAlignment.Center
+
+                    Container {
+                        preferredWidth: dimensions.compileMapWidth
+                        preferredHeight: dimensions.cmdHeight
+                        bottomMargin: dimensions.itemPadding
+                        layout: DockLayout {
+                        }
+
+                        Container {
+                            verticalAlignment: VerticalAlignment.Center
+                            horizontalAlignment: HorizontalAlignment.Center
+                            layout: StackLayout {
+                                orientation: LayoutOrientation.LeftToRight
+                            }
+
+                            FunctionCommand {
+                                objectName: "functionHeader"
+                                background: Color.Gray
+                                gestureHandlers: [
+                                    TapHandler {
+                                        onTapped: {
+                                            _app.selectNextFunction();
+                                        }
+                                    }
+                                ]
+                            }
+                            FunctionCommand {
+                                objectName: "functionAction1"
+                                gestureHandlers: [
+                                    TapHandler {
+                                        onTapped: {
+                                            _app.removeFunctionCommand(0);
+                                        }
+                                    }
+                                ]
+                            }
+                            FunctionCommand {
+                                objectName: "functionAction2"
+                                gestureHandlers: [
+                                    TapHandler {
+                                        onTapped: {
+                                            _app.removeFunctionCommand(1);
+                                        }
+                                    }
+                                ]
+                            }
+                            FunctionCommand {
+                                objectName: "functionAction3"
+                                gestureHandlers: [
+                                    TapHandler {
+                                        onTapped: {
+                                            _app.removeFunctionCommand(2);
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+
+                    Container {
+                        preferredWidth: dimensions.compileMapWidth
+                        preferredHeight: dimensions.cmdHeight
+                        layout: DockLayout {
+                        }
+
+                        Container {
+                            verticalAlignment: VerticalAlignment.Center
+                            horizontalAlignment: HorizontalAlignment.Center
+                            layout: StackLayout {
+                                orientation: LayoutOrientation.LeftToRight
+                            }
+
+                            FunctionCommand {
+                                objectName: "functionAction4"
+                                gestureHandlers: [
+                                    TapHandler {
+                                        onTapped: {
+                                            _app.removeFunctionCommand(3);
+                                        }
+                                    }
+                                ]
+                            }
+                            FunctionCommand {
+                                objectName: "functionAction5"
+                                gestureHandlers: [
+                                    TapHandler {
+                                        onTapped: {
+                                            _app.removeFunctionCommand(4);
+                                        }
+                                    }
+                                ]
+                            }
+                            FunctionCommand {
+                                objectName: "functionAction6"
+                                gestureHandlers: [
+                                    TapHandler {
+                                        onTapped: {
+                                            _app.removeFunctionCommand(5);
+                                        }
+                                    }
+                                ]
+                            }
+                            FunctionCommand {
+                                objectName: "functionAction7"
+                                gestureHandlers: [
+                                    TapHandler {
+                                        onTapped: {
+                                            _app.removeFunctionCommand(6);
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
             }
         }
-        
+
         Container {
             id: menuContainer
             objectName: "menuContainer"
             preferredWidth: dimensions.screenWidth
             preferredHeight: dimensions.screenHeight
             background: Color.Black
-            layout: DockLayout {}
+            layout: DockLayout {
+            }
             visible: false
-            
+
             Container {
                 verticalAlignment: VerticalAlignment.Center
                 horizontalAlignment: HorizontalAlignment.Center
@@ -337,7 +524,7 @@ Page {
             }
         }
     }
-    
+
     shortcuts: [
         Shortcut {
             key: "space"

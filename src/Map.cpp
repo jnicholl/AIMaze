@@ -52,7 +52,8 @@ Map::Map(int rows, int cols, int endX, int endY, int *data, Container *mapArea, 
 			}
 		}
 	}
-	QObject::connect(m_mapArea, SIGNAL(onPreferredHeightChanged(float)), this, SLOT(parentHeightChanged(float)));
+
+	QObject::connect(m_mapArea, SIGNAL(preferredHeightChanged(float)), this, SLOT(parentHeightChanged(float)));
 	mapArea->add(m_mapArea);
 }
 
