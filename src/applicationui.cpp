@@ -46,6 +46,10 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 , m_selectedFunction(0)
 , m_functionHeader(0)
 , m_shouldShowFunctions(false)
+, m_isInF1(false)
+, m_isInF2(false)
+, m_isInF3(false)
+, m_highlightedContainer(0)
 {
 	loadSavedState();
 
@@ -133,7 +137,7 @@ void ApplicationUI::compilePhaseDone()
 		for (int j=0; j<DEFAULT_FUNCTION_SIZE; j++) {
 			container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(i+1).arg(j+1));
 			if (container)
-				container->setVisible(false);
+				container->setProperty("actionVisible", false);
 			else
 				qDebug() << "No container at " << QString("func%1_act%2").arg(i+1).arg(j+1);
 		}
@@ -144,7 +148,7 @@ void ApplicationUI::compilePhaseDone()
 			container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(i+1).arg(j + 1 + (DEFAULT_FUNCTION_SIZE - f->commandCount())));
 			if (container) {
 				container->setProperty("imageSource", getImageForCommand(f->at(j)));
-				container->setVisible(true);
+				container->setProperty("actionVisible", true);
 			} else
 				qDebug() << "No container at " << QString("func%1_act%2").arg(i+1).arg(j + 1 + (DEFAULT_FUNCTION_SIZE - f->commandCount()));
 		}
@@ -274,7 +278,9 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 		m_levelIndex = 0; // Uhoh?
 
 	m_phase = COMPILE;
+	m_selectedFunction = 0;
 	setShouldShowFunctions(false);
+	setIsInFunction(-1);
 	Container *compileContainer = m_gamePage->findChild<Container*>("compilePhaseContainer");
 	compileContainer->setVisible(true);
 
@@ -464,6 +470,21 @@ void ApplicationUI::removeFunctionCommand(int index)
 	drawSelectedFunction();
 }
 
+void ApplicationUI::highlightFunction(int function, int pc)
+{
+	if (m_highlightedContainer) {
+		m_highlightedContainer->setProperty("highlighted", false);
+	}
+
+	Container *container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(function+1).arg((DEFAULT_FUNCTION_SIZE-m_functions[function]->commandCount())+pc+1));
+	if (container) {
+		m_highlightedContainer = container;
+		m_highlightedContainer->setProperty("highlighted", true);
+	} else {
+		qDebug() << "Unable to find container: " << QString("func%1_act%2").arg(function+1).arg((DEFAULT_FUNCTION_SIZE-m_functions[function]->commandCount())+pc+1);
+	}
+}
+
 void ApplicationUI::timerFired()
 {
 	FunctionRunner *frame = 0;
@@ -492,12 +513,21 @@ void ApplicationUI::timerFired()
 		}
 
 		if (!m_stack.empty()) {
+			setIsInFunction(frame->function());
+			highlightFunction(frame->function(), frame->pc());
 			cmd = frame->step();
 			countsAsMove = false;
 			shouldRemove = false;
 		}
 
 		frame = 0; // We re-use this later if the command was a function call.
+	}
+
+	if (m_stack.empty()) {
+		setIsInFunction(-1);
+		if (m_highlightedContainer) {
+			m_highlightedContainer->setProperty("highlighted", false);
+		}
 	}
 
 	qDebug() << "Cmd: " << cmd;
@@ -512,17 +542,17 @@ void ApplicationUI::timerFired()
 		m_robot->turnRight();
 		break;
 	case CMD_F1:
-		frame = new FunctionRunner(m_functions[0]);
+		frame = new FunctionRunner(0, m_functions[0]);
 		countsAsMove = true;
 		shouldRemove = false;
 		break;
 	case CMD_F2:
-		frame = new FunctionRunner(m_functions[1]);
+		frame = new FunctionRunner(1, m_functions[1]);
 		countsAsMove = true;
 		shouldRemove = false;
 		break;
 	case CMD_F3:
-		frame = new FunctionRunner(m_functions[2]);
+		frame = new FunctionRunner(2, m_functions[2]);
 		countsAsMove = true;
 		shouldRemove = false;
 		break;
@@ -540,7 +570,8 @@ void ApplicationUI::timerFired()
 	if (countsAsMove) {
 		m_robot->decrementMoves();
 		if (m_robot->hasNoPower(!m_stack.empty())) {
-			processFinish(m_robot->finished());
+			QTimer::singleShot(500, this, SLOT(processFinish()));
+			//processFinish(m_robot->finished());
 			return;
 		}
 	}
@@ -548,7 +579,7 @@ void ApplicationUI::timerFired()
 	if (!m_robot->finished())
 		m_progressAnimation->play();
 	else
-		processFinish(true);
+		QTimer::singleShot(500, this, SLOT(processFinish()));
 }
 
 void ApplicationUI::clickMenuButton()
@@ -565,8 +596,9 @@ void ApplicationUI::clickMenuButton()
 	}
 }
 
-void ApplicationUI::processFinish(bool win)
+void ApplicationUI::processFinish()
 {
+	bool win = m_robot->finished();
 	pause();
 	m_phase = FINISHED;
 	QString text, buttonText;

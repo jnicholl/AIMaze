@@ -59,92 +59,146 @@ Page {
             }
 
             Container { // at F1 button
+                id: f1slideout
                 horizontalAlignment: HorizontalAlignment.Right
-                preferredWidth: dimensions.cmdWidth * 3
+                preferredWidth: dimensions.cmdWidth * 7
                 preferredHeight: dimensions.cmdHeight
                 bottomMargin: dimensions.itemPadding
-                visible: _app.showFunctions && cmdF1.visible
+                property bool childrenVisible: (_app.isInF1 || _app.showFunctions) && cmdF1.visible
+                opacity: _app.isInF1?0.8:0.5
                 layout: StackLayout {
                     orientation: LayoutOrientation.RightToLeft
                 }
                 SlideoutCommand {
-                    objectName: "func1_act1"
-                }
-                SlideoutCommand {
-                    objectName: "func1_act2"
-                }
-                SlideoutCommand {
-                    objectName: "func1_act3"
-                }
-                SlideoutCommand {
-                    objectName: "func1_act4"
-                }
-                SlideoutCommand {
-                    objectName: "func1_act5"
+                    objectName: "func1_act7"
+                    property bool actionVisible: true
+                    visible: f1slideout.childrenVisible && actionVisible
                 }
                 SlideoutCommand {
                     objectName: "func1_act6"
+                    property bool actionVisible: true
+                    visible: f1slideout.childrenVisible && actionVisible
                 }
                 SlideoutCommand {
-                    objectName: "func1_act7"
+                    objectName: "func1_act5"
+                    property bool actionVisible: true
+                    visible: f1slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func1_act4"
+                    property bool actionVisible: true
+                    visible: f1slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func1_act3"
+                    property bool actionVisible: true
+                    visible: f1slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func1_act2"
+                    property bool actionVisible: true
+                    visible: f1slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func1_act1"
+                    property bool actionVisible: true
+                    visible: f1slideout.childrenVisible && actionVisible
                 }
             }
 
             Container { // at F2 button
+                id: f2slideout
                 horizontalAlignment: HorizontalAlignment.Right
-                preferredWidth: dimensions.cmdWidth
+                preferredWidth: dimensions.cmdWidth * 7
                 preferredHeight: dimensions.cmdHeight
                 bottomMargin: dimensions.itemPadding
-                visible: _app.showFunction && cmdF2.visible
-                SlideoutCommand {
-                    objectName: "func2_act1"
-                }
-                SlideoutCommand {
-                    objectName: "func2_act2"
-                }
-                SlideoutCommand {
-                    objectName: "func2_act3"
-                }
-                SlideoutCommand {
-                    objectName: "func2_act4"
-                }
-                SlideoutCommand {
-                    objectName: "func2_act5"
-                }
-                SlideoutCommand {
-                    objectName: "func2_act6"
+                property bool childrenVisible: (_app.isInF2 || _app.showFunctions) && cmdF2.visible
+                opacity: _app.isInF2 ? 0.8 : 0.5
+                layout: StackLayout {
+                    orientation: LayoutOrientation.RightToLeft
                 }
                 SlideoutCommand {
                     objectName: "func2_act7"
+                    property bool actionVisible: true
+                    visible: f2slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func2_act6"
+                    property bool actionVisible: true
+                    visible: f2slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func2_act5"
+                    property bool actionVisible: true
+                    visible: f2slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func2_act4"
+                    property bool actionVisible: true
+                    visible: f2slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func2_act3"
+                    property bool actionVisible: true
+                    visible: f2slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func2_act2"
+                    property bool actionVisible: true
+                    visible: f2slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func2_act1"
+                    property bool actionVisible: true
+                    visible: f2slideout.childrenVisible && actionVisible
                 }
             }
 
             Container { // at F3 button
+                id: f3slideout
                 horizontalAlignment: HorizontalAlignment.Right
-                preferredWidth: dimensions.cmdWidth
+                preferredWidth: dimensions.cmdWidth * 7
                 preferredHeight: dimensions.cmdHeight
                 bottomMargin: dimensions.itemPadding
-                visible: _app.showFunction && cmdF3.visible
-                SlideoutCommand {
-                    objectName: "func3_act1"
-                }
-                SlideoutCommand {
-                    objectName: "func3_act2"
-                }
-                SlideoutCommand {
-                    objectName: "func3_act3"
-                }
-                SlideoutCommand {
-                    objectName: "func3_act4"
-                }
-                SlideoutCommand {
-                    objectName: "func3_act5"
-                }
-                SlideoutCommand {
-                    objectName: "func3_act6"
+                property bool childrenVisible: (_app.isInF3 || _app.showFunctions) && cmdF3.visible
+                opacity: _app.isInF3 ? 0.8 : 0.5
+                layout: StackLayout {
+                    orientation: LayoutOrientation.RightToLeft
                 }
                 SlideoutCommand {
                     objectName: "func3_act7"
+                    property bool actionVisible: true
+                    visible: f3slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func3_act6"
+                    property bool actionVisible: true
+                    visible: f3slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func3_act5"
+                    property bool actionVisible: true
+                    visible: f3slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func3_act4"
+                    property bool actionVisible: true
+                    visible: f3slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func3_act3"
+                    property bool actionVisible: true
+                    visible: f3slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func3_act2"
+                    property bool actionVisible: true
+                    visible: f3slideout.childrenVisible && actionVisible
+                }
+                SlideoutCommand {
+                    objectName: "func3_act1"
+                    property bool actionVisible: true
+                    visible: f3slideout.childrenVisible && actionVisible
                 }
             }
         }
@@ -577,7 +631,7 @@ Page {
                     text: "Continue"
                     onClicked: {
                         menuContainer.setVisible(false);
-                        _app.clickMenuButton();                      
+                        _app.clickMenuButton();
                     }
                 }
                 Button {

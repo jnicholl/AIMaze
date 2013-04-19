@@ -35,8 +35,9 @@ private:
 
 class FunctionRunner {
 public:
-	FunctionRunner(const Function *f)
-		: m_function(f)
+	FunctionRunner(int index, const Function *f)
+		: m_index(index)
+		, m_function(f)
 		, m_pos(0)
 	{}
 
@@ -53,7 +54,11 @@ public:
 		return m_pos >= m_function->commandCount();
 	}
 
+	int function() const { return m_index; }
+	int pc() const { return m_pos; }
+
 private:
+	int m_index;
 	const Function *m_function;
 	int m_pos;
 };

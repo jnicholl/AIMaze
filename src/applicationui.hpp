@@ -41,6 +41,9 @@ class ApplicationUI : public QObject
     Q_PROPERTY(int functionCount READ functionCount NOTIFY functionCountChanged)
     Q_PROPERTY(int levelAvailable READ levelAvailable NOTIFY levelAvailableChanged)
     Q_PROPERTY(bool showFunctions READ shouldShowFunctions NOTIFY showFunctionsChanged)
+    Q_PROPERTY(bool isInF1 READ isInF1 NOTIFY isInF1Changed)
+    Q_PROPERTY(bool isInF2 READ isInF2 NOTIFY isInF2Changed)
+    Q_PROPERTY(bool isInF3 READ isInF3 NOTIFY isInF3Changed)
 
 public:
     ApplicationUI(bb::cascades::Application *app);
@@ -116,10 +119,62 @@ public:
     	}
     }
 
+    bool isInF1() const { return m_isInF1; }
+    void setIsInF1(bool val) {
+    	if (val != m_isInF1) {
+    		m_isInF1 = val;
+    		emit isInF1Changed(m_isInF1);
+    	}
+    }
+    bool isInF2() const { return m_isInF2; }
+    void setIsInF2(bool val) {
+    	if (val != m_isInF2) {
+    		m_isInF2 = val;
+    		emit isInF2Changed(m_isInF2);
+    	}
+    }
+    bool isInF3() const { return m_isInF3; }
+    void setIsInF3(bool val) {
+    	if (val != m_isInF3) {
+    		m_isInF3 = val;
+    		emit isInF3Changed(m_isInF3);
+    	}
+    }
+    void setIsInFunction(int index) {
+    	qDebug() << "set is in function " << index;
+    	switch (index) {
+    	case 0:
+			setIsInF1(true);
+			setIsInF2(false);
+			setIsInF3(false);
+			break;
+    	case 1:
+			setIsInF1(false);
+			setIsInF2(true);
+			setIsInF3(false);
+			break;
+    	case 2:
+			setIsInF1(false);
+			setIsInF2(false);
+			setIsInF3(true);
+			break;
+    	default:
+    		setIsInF1(false);
+    		setIsInF2(false);
+    		setIsInF3(false);
+    		break;
+    	}
+    }
+
+    Q_SLOT void processFinish();
+
 signals:
 	void functionCountChanged(int);
 	void levelAvailableChanged(int);
 	void showFunctionsChanged(bool);
+	void isInF1Changed(bool);
+	void isInF2Changed(bool);
+	void isInF3Changed(bool);
 
 private:
 	void loadSavedState();
@@ -129,7 +184,8 @@ private:
     void setupQueue();
 
     void setupLevel(const QVariantMap &levelData);
-    void processFinish(bool win);
+
+    void highlightFunction(int func, int pc);
 
     static QString getImageForCommand(CommandType type);
 
@@ -146,6 +202,7 @@ private:
     CommandType m_queueCommands[QUEUE_LIMIT];
     QList<bb::cascades::Container*> m_queue;
     QTimer m_timer;
+    QTimer m_finishTimer;
 
     int m_levelIndex;
     int m_levelAvailable;
@@ -168,6 +225,11 @@ private:
     bool m_shouldShowFunctions;
 
     QStack<FunctionRunner*> m_stack;
+
+    bool m_isInF1;
+    bool m_isInF2;
+    bool m_isInF3;
+    bb::cascades::Container *m_highlightedContainer;
 };
 
 #endif /* ApplicationUI_HPP_ */

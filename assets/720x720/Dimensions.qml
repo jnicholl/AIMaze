@@ -23,13 +23,13 @@ Container {
     property int cmdHeight: sidebarWidth - sidebarPadding
 
     // Padding between bar edge and command button
-    property int sidebarPadding: 40
+    property int sidebarPadding: 30
 
     // Padding between queue items
     property int queueItemPadding: 30
 
     // Padding between sidebar items
-    property int itemPadding: 20
+    property int itemPadding: 10
 
     // Not used
     property int backButtonHeight: 62
