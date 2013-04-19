@@ -9,11 +9,11 @@ NavigationPane {
     firstPage: Page {
         id: pgMain
         content: Container {
-            Label {
+            background: Color.Black
+            ImageView {
                 horizontalAlignment: HorizontalAlignment.Fill
                 verticalAlignment: VerticalAlignment.Top
-                text: "Game Name"
-                textStyle.textAlign: TextAlign.Center
+                imageSource: "asset:///images/title.png"
             }
             ListView {
                 id: listView

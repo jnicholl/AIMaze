@@ -9,7 +9,7 @@ Container {
     verticalAlignment: VerticalAlignment.Center
     preferredWidth: dimensions.cmdWidth
     preferredHeight: dimensions.cmdHeight
-    background: highlighted?highlight.imagePaint:Color.Black
+    background: highlighted?highlight.imagePaint:normal.imagePaint
     visible: imageSource != ""
 
     ImageView {
@@ -19,6 +19,10 @@ Container {
         ImagePaintDefinition {
             id: highlight
             imageSource: "asset:///images/highlight.png"
+        },
+        ImagePaintDefinition {
+            id: normal
+            imageSource: "asset:///images/border.png"
         }
     ]
 }

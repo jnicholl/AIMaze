@@ -8,7 +8,7 @@ Container {
     verticalAlignment: VerticalAlignment.Center
     preferredWidth: dimensions.cmdWidth
     preferredHeight: dimensions.cmdHeight
-    background: Color.Gray
+    background: normal.imagePaint
     rightMargin: dimensions.queueItemPadding
 
     ImageView {
@@ -20,6 +20,13 @@ Container {
             onTapped: {
                 _app.removeQueuedCommand(index);
             }
+        }
+    ]
+
+    attachedObjects: [
+        ImagePaintDefinition {
+            id: normal
+            imageSource: "asset:///images/border.png"
         }
     ]
 }

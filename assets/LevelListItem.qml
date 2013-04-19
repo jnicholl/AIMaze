@@ -18,22 +18,32 @@ Container {
         layout: DockLayout {}
         verticalAlignment: VerticalAlignment.Fill
         horizontalAlignment: HorizontalAlignment.Fill
-        preferredWidth: 240
-        preferredHeight: 240
+        preferredWidth: 160
+        preferredHeight: 160
         // and text below
         ImageView {
             horizontalAlignment: HorizontalAlignment.Center
             verticalAlignment: VerticalAlignment.Center
-            imageSource: "asset:///images/levelbutton.png"
+            imageSource: "asset:///images/level"+ListItemData.text+".png"
             scalingMethod: ScalingMethod.AspectFit
         }
-        Label {
+        
+        Container {
             horizontalAlignment: HorizontalAlignment.Center
             verticalAlignment: VerticalAlignment.Center
-            text: (listItem.ListItem.indexInSection > lastAvailableIndex)? "X" : ListItemData.text
-            textStyle.base: SystemDefaults.TextStyles.BigText
-            textStyle.textAlign: TextAlign.Center
+            preferredWidth: 160
+            preferredHeight: 160
+            opacity: 0.7
+            visible: (listItem.ListItem.indexInSection > lastAvailableIndex)
+            background: Color.Black
         }
+//        Label {
+//            horizontalAlignment: HorizontalAlignment.Center
+//            verticalAlignment: VerticalAlignment.Center
+//            text: (listItem.ListItem.indexInSection > lastAvailableIndex)? "X" : ListItemData.text
+//            textStyle.base: SystemDefaults.TextStyles.BigText
+//            textStyle.textAlign: TextAlign.Center
+//        }
     }
 
     // Set visual appearance of activated and selected item.

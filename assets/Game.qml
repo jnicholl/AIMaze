@@ -262,7 +262,7 @@ Page {
                 }
                 preferredHeight: dimensions.queueHeight
                 preferredWidth: dimensions.playAreaWidth
-                leftPadding: dimensions.sidebarPadding
+                leftPadding: dimensions.sidebarPadding * 4/3
             }
         }
 
@@ -274,22 +274,15 @@ Page {
             }
             preferredHeight: dimensions.screenHeight
             preferredWidth: dimensions.sidebarWidth
-            background: Color.Blue
+            background: Color.Black // FIXME: Image
             topPadding: dimensions.itemPadding
             bottomPadding: dimensions.itemPadding
 
-            Container {
+			SidebarCommand {
                 id: cmdForward
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                background: Color.Black
-                bottomMargin: dimensions.itemPadding
-
                 ImageView {
                     imageSource: "asset:///images/forward.png"
                 }
-
                 gestureHandlers: [
                     TapHandler {
                         onTapped: {
@@ -299,18 +292,11 @@ Page {
                 ]
             }
 
-            Container {
+            SidebarCommand {
                 id: cmdLeft
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                background: Color.Black
-                bottomMargin: dimensions.itemPadding
-
                 ImageView {
                     imageSource: "asset:///images/left.png"
                 }
-
                 gestureHandlers: [
                     TapHandler {
                         onTapped: {
@@ -320,18 +306,11 @@ Page {
                 ]
             }
 
-            Container {
+            SidebarCommand {
                 id: cmdRight
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                background: Color.Black
-                bottomMargin: dimensions.itemPadding
-
                 ImageView {
                     imageSource: "asset:///images/right.png"
                 }
-
                 gestureHandlers: [
                     TapHandler {
                         onTapped: {
@@ -341,19 +320,12 @@ Page {
                 ]
             }
 
-            Container {
+            SidebarCommand {
                 id: cmdF1
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                background: Color.Black
-                bottomMargin: dimensions.itemPadding
                 visible: _app.functionCount > 0
-
                 ImageView {
                     imageSource: "asset:///images/f1.png"
                 }
-
                 gestureHandlers: [
                     TapHandler {
                         onTapped: {
@@ -363,19 +335,12 @@ Page {
                 ]
             }
 
-            Container {
+            SidebarCommand {
                 id: cmdF2
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                background: Color.Black
-                bottomMargin: dimensions.itemPadding
                 visible: _app.functionCount > 1
-
                 ImageView {
                     imageSource: "asset:///images/f2.png"
                 }
-
                 gestureHandlers: [
                     TapHandler {
                         onTapped: {
@@ -385,19 +350,12 @@ Page {
                 ]
             }
 
-            Container {
+            SidebarCommand {
                 id: cmdF3
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                background: Color.Black
-                bottomMargin: dimensions.itemPadding
                 visible: _app.functionCount > 2
-
                 ImageView {
                     imageSource: "asset:///images/f3.png"
                 }
-
                 gestureHandlers: [
                     TapHandler {
                         onTapped: {
@@ -407,19 +365,12 @@ Page {
                 ]
             }
 
-            Container {
+            SidebarCommand {
                 id: cmdViewFunctions
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: dimensions.cmdWidth
-                preferredHeight: dimensions.cmdHeight
-                background: Color.Black
-                bottomMargin: dimensions.itemPadding
                 visible: _app.functionCount > 0 && compilePhaseContainer.visible == false
-
                 ImageView {
                     imageSource: "asset:///images/viewfunctions.png"
                 }
-
                 gestureHandlers: [
                     TapHandler {
                         onTapped: {
@@ -480,7 +431,7 @@ Page {
                 objectName: "compileFunctionContainer"
                 preferredWidth: dimensions.compileMapWidth
                 preferredHeight: dimensions.compileFunctionHeight
-                background: Color.Green
+                background: Color.Black // FIXME: Image
                 layout: DockLayout {
                 }
 
@@ -504,13 +455,19 @@ Page {
 
                             FunctionCommand {
                                 objectName: "functionHeader"
-                                background: Color.Gray
+                                background: highlight.imagePaint
                                 gestureHandlers: [
                                     TapHandler {
                                         onTapped: {
                                             _app.selectNextFunction();
                                         }
                                     }
+                                ]
+                                attachedObjects: [
+	                                    ImagePaintDefinition {
+	                                    id: highlight
+	                                    imageSource: "asset:///images/highlight.png"
+	                                }
                                 ]
                             }
                             FunctionCommand {
@@ -618,7 +575,7 @@ Page {
             Container {
                 verticalAlignment: VerticalAlignment.Center
                 horizontalAlignment: HorizontalAlignment.Center
-                background: Color.Red
+                background: Color.Black // FIXME: Image
                 Label {
                     objectName: "menuTitle"
                     text: "Paused"

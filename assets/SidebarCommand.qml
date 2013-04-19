@@ -1,18 +1,11 @@
 import bb.cascades 1.0
 
 Container {
-    property variant dimensions: Dimensions {
-    }
-    property alias imageSource: view.imageSource
-    verticalAlignment: VerticalAlignment.Center
+    horizontalAlignment: HorizontalAlignment.Center
     preferredWidth: dimensions.cmdWidth
     preferredHeight: dimensions.cmdHeight
     background: normal.imagePaint
-    rightMargin: dimensions.queueItemPadding
-
-    ImageView {
-        id: view
-    }
+    bottomMargin: dimensions.itemPadding
 
     attachedObjects: [
         ImagePaintDefinition {
