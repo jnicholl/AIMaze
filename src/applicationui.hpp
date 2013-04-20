@@ -71,6 +71,7 @@ public:
     Q_SLOT void nextLevel();
     Q_SLOT void retry();
     Q_SLOT void clickMenuButton();
+    Q_SLOT void showMenu();
 
     Q_SLOT void startLevel(const QVariantList &indexPath);
 

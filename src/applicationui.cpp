@@ -54,6 +54,9 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 , m_highlightedContainer(0)
 , m_tutorial(0)
 {
+	QObject::connect(Application::instance(), SIGNAL(swipeDown()), this, SLOT(showMenu()));
+	QObject::connect(Application::instance(), SIGNAL(thumbnail()), this, SLOT(showMenu()));
+	QObject::connect(Application::instance(), SIGNAL(invisible()), this, SLOT(showMenu()));
 	loadSavedState();
 
 	// create scene document from main.qml asset
@@ -113,6 +116,14 @@ void ApplicationUI::back()
 {
 	m_phase = MENU;
 	m_navigationPane->pop();
+}
+
+void ApplicationUI::showMenu()
+{
+	if (m_phase == RUN || m_phase == COMPILE) {
+		pause();
+		m_gamePage->findChild<Container*>("menuContainer")->setVisible(true);
+	}
 }
 
 // FIXME: Should really store the remaining time and start the next tick as much shorter.
@@ -499,12 +510,6 @@ void ApplicationUI::timerFired()
 	bool shouldRemove = true;
 	bool countsAsMove = true;
 	CommandType cmd = m_queueCommands[0];
-
-	if (m_robot->hasNoPower(!m_stack.empty())) {
-		qDebug("Unexpectedly has no power on timer fire?");
-		pause();
-		return;
-	}
 
 	if (!m_stack.empty()) {
 		frame = m_stack.top();

@@ -35,3 +35,4 @@ Enhancements
 - Background picture behind map
 - Disable swipe down
 - Store scores for each level
+- window cover

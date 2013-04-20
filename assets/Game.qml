@@ -391,8 +391,7 @@ Page {
                 horizontalAlignment: HorizontalAlignment.Center
                 visible: dimensions.screenWidth > 1000 && compilePhaseContainer.visible == false && menuContainer.visible == false
                 onClicked: {
-                    _app.pause();
-                    menuContainer.setVisible(true);
+                    _app.showMenu();
                 }
             }
         }
@@ -606,8 +605,7 @@ Page {
         Shortcut {
             key: "space"
             onTriggered: {
-                _app.pause();
-                menuContainer.setVisible(true);
+                _app.showMenu();
             }
         }
     ]

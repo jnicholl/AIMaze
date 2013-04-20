@@ -26,7 +26,7 @@
 
     <!-- A universally unique application identifier. Must be unique across all BlackBerry Tablet OS applications.
          Using a reverse DNS-style name as the id is recommended. (Eg. com.example.ExampleApplication.) Required. -->
-    <id>com.example.AIMaze</id>
+    <id>com.jnicholl.EMUU</id>
 
     <!-- The name that is displayed in the BlackBerry Tablet OS application installer. 
          May have multiple values for each language. See samples or xsd schema file. Optional. -->
@@ -52,7 +52,8 @@
     <!-- <copyright></copyright> -->
 
     <!--  Name of author which is used for signing. Must match the developer name of your development certificate. -->
-    <author>Example Inc.</author>
+    <author>Jeremy Nicholl</author>
+    <authorId>gYAAgHG4ZAb7ReFE13SlC_4SRIg</authorId>
     
     <!--  Unique author ID assigned by signing authority. Required if using debug tokens. -->
     <!-- <authorId>ABC1234YjsnUk235h</authorId> -->
@@ -83,7 +84,7 @@
        <platformArchitecture>x86</platformArchitecture>
        <asset path="x86/o-g/AIMaze" entry="true" type="Qnx/Elf">AIMaze</asset>
     </configuration>
-    
+       
     <!--  The icon for the application, which should be 86x86. -->
     <icon>
         <image>icon.png</image>
@@ -101,4 +102,5 @@
     <permission system="true">run_native</permission>
     <env var="LD_LIBRARY_PATH" value="app/native/lib:/usr/lib/qt4/lib"/>
 	<env var="CONSOLE_MODE" value="file"/>
+	<env var="CASCADES_THEME" value="dark"/>
 </qnx>

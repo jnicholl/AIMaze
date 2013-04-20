@@ -5,7 +5,26 @@ NavigationPane {
     id: navigationPane
     peekEnabled: false
     backButtonsVisible: false
-    
+
+    Menu.definition: MenuDefinition {
+        helpAction: HelpActionItem {
+            onTriggered: {
+            	helpSheet.open();
+            }
+        }
+    } // end of MenuDefinition
+
+    attachedObjects: [
+        HelpSheet {
+            id: helpSheet
+        }
+//        Sheet {
+//            id: helpSheet
+//            content: HelpPage {
+//            }
+//        }
+    ]
+
     firstPage: Page {
         id: pgMain
         content: Container {
@@ -36,8 +55,7 @@ NavigationPane {
                 ]
                 onTriggered: {
                     console.log("selected_index: " + indexPath)
-                    if (indexPath <= levelAvailable)
-                        _app.startLevel(indexPath);
+                    if (indexPath <= levelAvailable) _app.startLevel(indexPath);
                 }
                 horizontalAlignment: HorizontalAlignment.Fill
                 layoutProperties: StackLayoutProperties {
@@ -46,6 +64,7 @@ NavigationPane {
             }
         }
     }
+    
     onCreationCompleted: {
         // enable layout to adapt to the device rotation
         // don't forget to enable screen rotation in bar-bescriptor.xml (Application->Orientation->Auto-orient)
