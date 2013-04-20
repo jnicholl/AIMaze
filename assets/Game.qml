@@ -568,22 +568,24 @@ Page {
             background: Color.Black
             layout: DockLayout {
             }
-            visible: false
-
+            visible: true
+            ImageView {
+                horizontalAlignment: HorizontalAlignment.Center
+                verticalAlignment: VerticalAlignment.Top
+                imageSource: "asset:///images/title.png"
+            }
             Container {
                 verticalAlignment: VerticalAlignment.Center
                 horizontalAlignment: HorizontalAlignment.Center
                 background: Color.Black // FIXME: Image
-                Label {
-                    objectName: "menuTitle"
-                    text: "Paused"
-                    horizontalAlignment: HorizontalAlignment.Center
-                    textStyle.textAlign: TextAlign.Center
-                }
+                layout: StackLayout {}
+                
                 Button {
                     objectName: "menuButton"
                     horizontalAlignment: HorizontalAlignment.Center
                     text: "Continue"
+                    bottomMargin: 20
+                    preferredWidth: 250
                     onClicked: {
                         menuContainer.setVisible(false);
                         _app.clickMenuButton();
@@ -592,6 +594,7 @@ Page {
                 Button {
                     horizontalAlignment: HorizontalAlignment.Center
                     text: "Menu"
+                    preferredWidth: 250
                     onClicked: {
                         menuContainer.setVisible(false);
                         _app.back();
