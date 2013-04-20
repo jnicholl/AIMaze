@@ -44,6 +44,7 @@ class ApplicationUI : public QObject
     Q_PROPERTY(bool isInF1 READ isInF1 NOTIFY isInF1Changed)
     Q_PROPERTY(bool isInF2 READ isInF2 NOTIFY isInF2Changed)
     Q_PROPERTY(bool isInF3 READ isInF3 NOTIFY isInF3Changed)
+    Q_PROPERTY(int tutorial READ tutorial NOTIFY tutorialChanged)
 
 public:
     ApplicationUI(bb::cascades::Application *app);
@@ -168,6 +169,14 @@ public:
 
     Q_SLOT void processFinish();
 
+    int tutorial() const { return m_tutorial; }
+    void setTutorial(int tutorial) {
+    	if (tutorial != m_tutorial) {
+    		m_tutorial = tutorial;
+    		emit tutorialChanged(m_tutorial);
+    	}
+    }
+
 signals:
 	void functionCountChanged(int);
 	void levelAvailableChanged(int);
@@ -175,6 +184,7 @@ signals:
 	void isInF1Changed(bool);
 	void isInF2Changed(bool);
 	void isInF3Changed(bool);
+	void tutorialChanged(int);
 
 private:
 	void loadSavedState();
@@ -212,7 +222,8 @@ private:
     enum Phase {
     	COMPILE,
     	RUN,
-    	FINISHED
+    	FINISHED,
+    	MENU
     } m_phase;
 
     int m_movesRemaining;
@@ -230,6 +241,8 @@ private:
     bool m_isInF2;
     bool m_isInF3;
     bb::cascades::Container *m_highlightedContainer;
+
+    int m_tutorial; // 0 for no tutorial, otherwise 1,2,3.
 };
 
 #endif /* ApplicationUI_HPP_ */

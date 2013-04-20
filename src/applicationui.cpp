@@ -15,10 +15,12 @@
 #include <bb/cascades/Button>
 #include <bb/cascades/SequentialAnimation>
 #include <bb/cascades/TapHandler>
+#include <bb/cascades/Window>
 
 #include "map.h"
 #include "robot.h"
 #include "function.h"
+#include <bb/cascades/ScreenIdleMode>
 
 using namespace bb::cascades;
 using namespace bb::device;
@@ -41,7 +43,7 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 , m_levelAvailable(0)
 , m_map(0)
 , m_robot(0)
-, m_phase(COMPILE)
+, m_phase(MENU)
 , m_functionCount(0)
 , m_selectedFunction(0)
 , m_functionHeader(0)
@@ -50,6 +52,7 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 , m_isInF2(false)
 , m_isInF3(false)
 , m_highlightedContainer(0)
+, m_tutorial(0)
 {
 	loadSavedState();
 
@@ -108,6 +111,7 @@ void ApplicationUI::saveState()
 
 void ApplicationUI::back()
 {
+	m_phase = MENU;
 	m_navigationPane->pop();
 }
 
@@ -153,8 +157,10 @@ void ApplicationUI::compilePhaseDone()
 				qDebug() << "No container at " << QString("func%1_act%2").arg(i+1).arg(j + 1 + (DEFAULT_FUNCTION_SIZE - f->commandCount()));
 		}
 	}
+	m_gamePage->findChild<Container*>("progressBar")->setTranslationX(0);
 	m_phase = RUN;
-	unpause();
+	Application::instance()->mainWindow()->setScreenIdleMode(ScreenIdleMode::KeepAwake);
+	QTimer::singleShot(3000, this, SLOT(unpause()));
 }
 
 void ApplicationUI::setupLevel(const QVariantMap &levelData)
@@ -191,6 +197,7 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 	int endY = levelData["endY"].toInt();
 	QVariantList mapData = levelData["data"].toList();
 	int moves = levelData["totalMoves"].toInt();
+	setTutorial(levelData["tutorial"].toInt()); // will return 0 if no tutorial field
 
 	int functionCount = 3;
 	if (levelData.contains("numFunctions"))
@@ -602,6 +609,7 @@ void ApplicationUI::processFinish()
 	bool win = m_robot->finished();
 	pause();
 	m_phase = FINISHED;
+	Application::instance()->mainWindow()->setScreenIdleMode(ScreenIdleMode::Normal);
 	QString text, buttonText;
 	if (win) {
 		text = "You won";

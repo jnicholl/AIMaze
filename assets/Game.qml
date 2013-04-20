@@ -228,6 +228,7 @@ Page {
 
             Container {
                 id: progressBar
+                objectName: "progressBar"
                 layoutProperties: AbsoluteLayoutProperties {
                     positionX: 0
                     positionY: 0
@@ -274,8 +275,8 @@ Page {
             }
             preferredHeight: dimensions.screenHeight
             preferredWidth: dimensions.sidebarWidth
-            background: Color.Black // FIXME: Image
-            topPadding: dimensions.itemPadding
+            //background: Color.Black // FIXME: Image
+            topPadding: dimensions.itemPadding+4
             bottomPadding: dimensions.itemPadding
 
 			SidebarCommand {
@@ -560,6 +561,12 @@ Page {
                     }
                 }
             }
+        }
+        
+        Tutorial1 {
+            id: tutorialContainer
+            objectName: "tutorialContainer"
+            visible: (_app.tutorial == 1)
         }
 
         Container {

@@ -2,4 +2,8 @@
 <item id="1" text="1" level="app/native/assets/levels/level1.json"/>
 <item id="2" text="2" level="app/native/assets/levels/level2.json"/>
 <item id="3" text="3" level="app/native/assets/levels/level3.json"/>
+<item id="4" text="4" level="app/native/assets/levels/level4.json"/>
+<item id="5" text="5" level="app/native/assets/levels/level5.json"/>
+<item id="6" text="6" level="app/native/assets/levels/level6.json"/>
+<item id="7" text="7" level="app/native/assets/levels/level7.json"/>
 </root>

@@ -62,7 +62,7 @@ bool Map::positionAvailable(int x, int y)
 	if (x < 0 || x >= m_cols) return false;
 	if (y < 0 || y >= m_rows) return false;
 
-	return m_data[y * m_rows + x] == 1;
+	return m_data[y * m_cols + x] == 1;
 }
 
 void Map::addRobotContainer(Control *robot)

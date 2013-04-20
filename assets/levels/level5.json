@@ -1,0 +1,17 @@
+{ 
+"width": 5, 
+"height": 5, 
+"startX": 0, 
+"startY": 0, 
+"startDir": "down", 
+"endX": 4, 
+"endY": 4, 
+"data": [1, 0, 1, 1, 1,
+		1, 0, 1, 0, 0,
+		1, 1, 1, 1, 1,
+		1, 0, 0, 0, 1,
+		1, 1, 1, 0, 1],
+"numFunctions": 2, 
+"functionLimit": [5, 3],
+"totalMoves": 4
+}

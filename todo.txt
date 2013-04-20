@@ -5,14 +5,18 @@ Recently Completed
 - View functions display
 - show display of currently executing function
 - Show disabled image for levels
+- Fix removing actions from queue
 
 - Game title
 - Game icon
 - Update robot picture
 - Level select icons
 
+Critical
+- Number of remaining moves needs to be visible!
+- Better maps
+
 Development and Graphics
-- Fix removing actions from queue (not sure how it broke)
 - Improve Victory/Loss Screen
 - Tutorial overlay and content
 - More levels
