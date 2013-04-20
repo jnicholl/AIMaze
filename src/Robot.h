@@ -27,7 +27,7 @@ public:
 		LEFT, UP, RIGHT, DOWN,
 	};
 
-	Robot(Map *map, int moves, int x = 0, int y = 0, int ex = 0, int ey = 0, Direction d = UP, QObject *parent = 0);
+	Robot(Map *map, int moves, bb::cascades::Label *label, int x = 0, int y = 0, int ex = 0, int ey = 0, Direction d = UP, QObject *parent = 0);
 
 	static Direction getDirection(const QString &dirString);
 	static const QString directionToString(Robot::Direction dir);

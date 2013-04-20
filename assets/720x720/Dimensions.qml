@@ -11,7 +11,7 @@ Container {
 
     // Size of gameplay area during compile phase
     property int compileMapWidth: playAreaWidth
-    property int compileMapHeight: 512
+    property int compileMapHeight: 472
     
     // Size of bars
     property int sidebarWidth: screenWidth - playAreaWidth

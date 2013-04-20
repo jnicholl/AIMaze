@@ -15,12 +15,25 @@ Page {
             objectName: "mapArea"
             layoutProperties: AbsoluteLayoutProperties {
                 positionX: 0
-                positionY: compilePhaseContainer.visible ? 0 : dimensions.queueHeight
+                positionY: compilePhaseContainer.visible ? dimensions.sidebarPadding : dimensions.queueHeight + dimensions.sidebarPadding
             }
             preferredWidth: dimensions.playAreaWidth
             preferredHeight: compilePhaseContainer.visible ? dimensions.compileMapHeight : dimensions.playAreaHeight
             layout: DockLayout {
             }
+        }
+        
+        Label {
+            id: movesLeftLabel
+            objectName: "movesLeft"
+            layoutProperties: AbsoluteLayoutProperties {
+                positionX: 0
+                positionY: compilePhaseContainer.visible ? 0 : dimensions.queueHeight - dimensions.itemPadding
+            }
+            preferredWidth: dimensions.playAreaWidth
+            preferredHeight: dimensions.sidebarPadding
+            textStyle.textAlign: TextAlign.Center
+            text: "10 moves left"
         }
 
         Container {
@@ -281,104 +294,83 @@ Page {
 
 			SidebarCommand {
                 id: cmdForward
-                ImageView {
-                    imageSource: "asset:///images/forward.png"
-                }
-                gestureHandlers: [
-                    TapHandler {
-                        onTapped: {
-                            _app.tapForward();
-                        }
+                ImageButton {
+                    defaultImageSource: "asset:///images/forward.png"
+                    pressedImageSource: "asset:///images/forwardp.png"
+                    onClicked: {
+                        _app.tapForward();
                     }
-                ]
+                }
             }
 
             SidebarCommand {
                 id: cmdLeft
-                ImageView {
-                    imageSource: "asset:///images/left.png"
-                }
-                gestureHandlers: [
-                    TapHandler {
-                        onTapped: {
-                            _app.tapLeft();
-                        }
+                ImageButton {
+                    defaultImageSource: "asset:///images/left.png"
+                    pressedImageSource: "asset:///images/leftp.png"
+                    onClicked: {
+                        _app.tapLeft();
                     }
-                ]
+                }
             }
 
             SidebarCommand {
                 id: cmdRight
-                ImageView {
-                    imageSource: "asset:///images/right.png"
-                }
-                gestureHandlers: [
-                    TapHandler {
-                        onTapped: {
-                            _app.tapRight();
-                        }
+                ImageButton {
+                    defaultImageSource: "asset:///images/right.png"
+                    pressedImageSource: "asset:///images/rightp.png"
+                    onClicked: {
+                        _app.tapRight();
                     }
-                ]
+                }
             }
 
             SidebarCommand {
                 id: cmdF1
                 visible: _app.functionCount > 0
-                ImageView {
-                    imageSource: "asset:///images/f1.png"
-                }
-                gestureHandlers: [
-                    TapHandler {
-                        onTapped: {
-                            _app.tapF1();
-                        }
+                ImageButton {
+                    defaultImageSource: "asset:///images/f1.png"
+                    pressedImageSource: "asset:///images/f1p.png"
+                    onClicked: {
+                        _app.tapF1();
                     }
-                ]
+                }
             }
 
             SidebarCommand {
                 id: cmdF2
                 visible: _app.functionCount > 1
-                ImageView {
-                    imageSource: "asset:///images/f2.png"
-                }
-                gestureHandlers: [
-                    TapHandler {
-                        onTapped: {
-                            _app.tapF2();
-                        }
+                ImageButton {
+                    defaultImageSource: "asset:///images/f2.png"
+                    pressedImageSource: "asset:///images/f2p.png"
+                    onClicked: {
+                        _app.tapF2();
                     }
-                ]
+                }
             }
 
             SidebarCommand {
                 id: cmdF3
                 visible: _app.functionCount > 2
-                ImageView {
-                    imageSource: "asset:///images/f3.png"
-                }
-                gestureHandlers: [
-                    TapHandler {
-                        onTapped: {
-                            _app.tapF3();
-                        }
+                ImageButton {
+                    defaultImageSource: "asset:///images/f3.png"
+                    pressedImageSource: "asset:///images/f3p.png"
+                    onClicked: {
+                        _app.tapF3();
                     }
-                ]
+                }
             }
 
             SidebarCommand {
                 id: cmdViewFunctions
                 visible: _app.functionCount > 0 && compilePhaseContainer.visible == false
-                ImageView {
-                    imageSource: "asset:///images/viewfunctions.png"
-                }
-                gestureHandlers: [
-                    TapHandler {
-                        onTapped: {
-                            _app.tapViewFunctions();
-                        }
+                ImageButton {
+                    defaultImageSource: "asset:///images/viewfunctions.png"
+                    pressedImageSource: "asset:///images/viewfunctionsp.png"
+                    onClicked: {
+                        _app.tapViewFunctions();
                     }
-                ]
+                }
             }
         }
 
@@ -432,7 +424,7 @@ Page {
                 objectName: "compileFunctionContainer"
                 preferredWidth: dimensions.compileMapWidth
                 preferredHeight: dimensions.compileFunctionHeight
-                background: Color.Black // FIXME: Image
+                //background: Color.Black // FIXME: Image
                 layout: DockLayout {
                 }
 
@@ -566,7 +558,7 @@ Page {
         Tutorial1 {
             id: tutorialContainer
             objectName: "tutorialContainer"
-            visible: (_app.tutorial == 1)
+            visible: (_app.tutorial == 1 && compilePhaseContainer.visible)
         }
 
         Container {

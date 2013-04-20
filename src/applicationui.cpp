@@ -229,7 +229,8 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 	}
 
 	m_map = new Map(height, width, endX, endY, data, m_mapArea, this);
-	m_robot = new Robot(m_map, moves, startX, startY, endX, endY, Robot::getDirection(direction), this);
+	Label *movesLabel = m_gamePage->findChild<Label*>("movesLeft");
+	m_robot = new Robot(m_map, moves, movesLabel, startX, startY, endX, endY, Robot::getDirection(direction), this);
 
 	m_functionHeader = static_cast<Container *>(m_gamePage->findChild<Container*>("functionHeader"));
 	m_functionActions.clear();

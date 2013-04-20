@@ -16,7 +16,7 @@
 
 using namespace bb::cascades;
 
-Robot::Robot(Map *map, int moves, int x, int y, int ex, int ey, Direction d, QObject *parent)
+Robot::Robot(Map *map, int moves, Label *label, int x, int y, int ex, int ey, Direction d, QObject *parent)
 	: QObject(parent)
 	, m_direction(d)
 	, m_x(x)
@@ -26,6 +26,7 @@ Robot::Robot(Map *map, int moves, int x, int y, int ex, int ey, Direction d, QOb
 	, m_map(map)
 	, m_moves(moves)
 	, m_image(0)
+	, m_label(label)
 {
 	const float cellSize = m_map->cellSize();
 	m_container = Container::create()
@@ -34,12 +35,12 @@ Robot::Robot(Map *map, int moves, int x, int y, int ex, int ey, Direction d, QOb
 		.layout(DockLayout::create());
 	m_image = ImageView::create("asset:///images/robot.png")
 		.preferredSize(cellSize, cellSize);
-	m_label = Label::create(QString::number(moves));
-	m_label->setHorizontalAlignment(HorizontalAlignment::Center);
-	m_label->setVerticalAlignment(VerticalAlignment::Center);
-
+//	m_label = Label::create(QString::number(moves));
+//	m_label->setHorizontalAlignment(HorizontalAlignment::Center);
+//	m_label->setVerticalAlignment(VerticalAlignment::Center);
+	m_label->setText(QString::number(moves) + " moves left");
 	m_container->add(m_image);
-	m_container->add(m_label);
+//	m_container->add(m_label);
 	m_map->addRobotContainer(m_container);
 	switch (m_direction) {
 	case LEFT:
@@ -191,5 +192,5 @@ void Robot::decrementMoves()
 {
 	m_moves--;
 	int displayMoves = std::max(m_moves, 0);
-	m_label->setText(QString::number(displayMoves));
+	m_label->setText(QString::number(displayMoves) + " moves left");
 }
