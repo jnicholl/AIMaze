@@ -47,6 +47,8 @@ public:
 
 	bool finished() const { return m_x == m_endX && m_y == m_endY; }
 
+	void setImageForPower(bool powered);
+
 signals:
 	void moved(int x, int y);
 

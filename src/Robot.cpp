@@ -58,6 +58,14 @@ Robot::Robot(Map *map, int moves, int x, int y, int ex, int ey, Direction d, QOb
 	}
 }
 
+void Robot::setImageForPower(bool powered)
+{
+	if (powered)
+		m_image->setImageSource(QUrl("asset:///images/robot.png"));
+	else
+		m_image->setImageSource(QUrl("asset:///images/robotoff.png"));
+}
+
 Robot::Direction Robot::getDirection(const QString &dirString)
 {
 	if (!dirString.compare("right", Qt::CaseInsensitive)) {

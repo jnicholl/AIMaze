@@ -570,6 +570,7 @@ void ApplicationUI::timerFired()
 	if (countsAsMove) {
 		m_robot->decrementMoves();
 		if (m_robot->hasNoPower(!m_stack.empty())) {
+			m_robot->setImageForPower(false);
 			QTimer::singleShot(500, this, SLOT(processFinish()));
 			//processFinish(m_robot->finished());
 			return;

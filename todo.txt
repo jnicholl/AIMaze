@@ -1,0 +1,33 @@
+Recently Completed
+- Enforce queue limit
+- Robot display of moves remaining
+- Store which levels have been completed
+- View functions display
+- show display of currently executing function
+- Show disabled image for levels
+
+- Game title
+- Game icon
+- Update robot picture
+- Level select icons
+
+Development and Graphics
+- Fix removing actions from queue (not sure how it broke)
+- Improve Victory/Loss Screen
+- Tutorial overlay and content
+- More levels
+
+Graphics only
+- Sidebar pictures
+- Pause menu pictures
+- Pause button picture
+- Function bar picture
+- Function header picture
+
+Enhancements
+- Back button on compile screen
+- 1280x720 resolution
+- No cheating on pause?
+- Background picture behind map
+- Disable swipe down
+- Store scores for each level
