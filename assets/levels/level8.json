@@ -1,0 +1,24 @@
+{ 
+"width": 8, 
+"height": 8, 
+"startX": 0, 
+"startY": 1, 
+"startDir": "up", 
+"endX": 7, 
+"endY": 0, 
+"data": [1, 1, 1, 1, 0, 0, 1, 1,
+		1, 0, 0, 1, 0, 0, 1, 0,
+		0, 0, 0, 1, 0, 1, 1, 0,
+		1, 1, 1, 1, 0, 1, 0, 0,
+		1, 0, 0, 0, 1, 1, 1, 1,
+		1, 0, 0, 0, 1, 0, 0, 1,
+		1, 1, 1, 1, 1, 0, 1, 1,
+		0, 0, 1, 1, 1, 0, 1, 0],
+"numFunctions": 3, 
+"functionLimit": [7,7,5],
+"totalMoves": 10,
+"solution": "1 r 1 l 2 2 3 3 3
+1 - f f f r f f f
+2 - f f f l f f f
+3 - r f l f f"
+}

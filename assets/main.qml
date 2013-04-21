@@ -9,20 +9,32 @@ NavigationPane {
     Menu.definition: MenuDefinition {
         helpAction: HelpActionItem {
             onTriggered: {
-            	helpSheet.open();
+                helpSheet.open();
             }
         }
+        actions: [
+            ActionItem {
+                title: "Privacy Policy"
+                onTriggered: {
+                    privacyPolicy.open();
+                }
+            }
+        ]
+        //        settingsAction: SettingsActionItem {
+        //            title: "Privacy Policy"
+        //            onTriggered: {
+        //                privacyPolicy.open();
+        //            }
+        //        }
     } // end of MenuDefinition
 
     attachedObjects: [
         HelpSheet {
             id: helpSheet
+        },
+        PrivacyPolicy {
+            id: privacyPolicy
         }
-//        Sheet {
-//            id: helpSheet
-//            content: HelpPage {
-//            }
-//        }
     ]
 
     firstPage: Page {
@@ -64,7 +76,7 @@ NavigationPane {
             }
         }
     }
-    
+
     onCreationCompleted: {
         // enable layout to adapt to the device rotation
         // don't forget to enable screen rotation in bar-bescriptor.xml (Application->Orientation->Auto-orient)

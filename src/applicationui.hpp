@@ -85,7 +85,7 @@ public:
     Q_SLOT void tapViewFunctions();
 
     // Click on queued command
-    Q_SLOT void removeQueuedCommand(int index);
+    Q_SLOT void removeQueuedCommand(int index, bool force=false);
 
     // Click on function command (to remove it)
     Q_SLOT void removeFunctionCommand(int index);

@@ -74,6 +74,8 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
     app->setScene(m_navigationPane);
 
     QObject::connect(&m_timer, SIGNAL(timeout()), this, SLOT(timerFired()));
+    m_finishTimer.setSingleShot(true);
+    QObject::connect(&m_finishTimer, SIGNAL(timeout()), this, SLOT(unpause()));
 }
 
 void ApplicationUI::loadSavedState()
@@ -130,6 +132,9 @@ void ApplicationUI::showMenu()
 void ApplicationUI::pause()
 {
 	if (m_phase == RUN) {
+		if (m_finishTimer.isActive()) {
+			m_finishTimer.stop();
+		}
 		m_timer.stop();
 		if (m_progressAnimation)
 			m_progressAnimation->stop();
@@ -171,7 +176,9 @@ void ApplicationUI::compilePhaseDone()
 
 	m_phase = RUN;
 	Application::instance()->mainWindow()->setScreenIdleMode(ScreenIdleMode::KeepAwake);
-	QTimer::singleShot(3000, this, SLOT(unpause()));
+
+	m_finishTimer.start(3000);
+	//QTimer::singleShot(3000, this, SLOT(unpause()));
 }
 
 void ApplicationUI::setupLevel(const QVariantMap &levelData)
@@ -308,7 +315,6 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 	m_gamePage->findChild<Container*>("tutorial3Container")->setProperty("state", 0);
 	m_gamePage->findChild<Container*>("progressBar")->setTranslationX(0);
 
-	m_gamePage->findChild<Label*>("menuTitle")->setText("Paused");
 	m_gamePage->findChild<Button*>("menuButton")->setText("Continue");
 	m_gamePage->findChild<Container*>("menuContainer")->setVisible(false);
 
@@ -472,12 +478,13 @@ void ApplicationUI::tapViewFunctions()
 	setShouldShowFunctions(!m_shouldShowFunctions);
 }
 
-void ApplicationUI::removeQueuedCommand(int index)
+void ApplicationUI::removeQueuedCommand(int index, bool force)
 {
 	qDebug() << "Removing queue command at " << index << " (queueCount = " << m_queueCount << ")";
 	if (index < 0) return;
 	if (index >= m_queueCount) return;
 	if (m_queueCommands[index] == CMD_EMPTY) return;
+	if (!force && index == 0 && !m_stack.empty()) return;
 
 	for (int i=index; i<QUEUE_LIMIT-1; i++) {
 		setQueueValue(i, m_queueCommands[i+1]);
@@ -523,7 +530,7 @@ void ApplicationUI::timerFired()
 			delete frame;
 			if (m_stack.empty()) {
 				// Finished all function calls, remove the function on the queue
-				removeQueuedCommand(0);
+				removeQueuedCommand(0, true);
 				cmd = m_queueCommands[0];
 				break;
 			}
@@ -583,7 +590,7 @@ void ApplicationUI::timerFired()
 	}
 
 	if (shouldRemove)
-		removeQueuedCommand(0);
+		removeQueuedCommand(0, true);
 
 	if (countsAsMove) {
 		m_robot->decrementMoves();
@@ -623,7 +630,7 @@ void ApplicationUI::processFinish()
 	Application::instance()->mainWindow()->setScreenIdleMode(ScreenIdleMode::Normal);
 	QString text, buttonText;
 	if (win) {
-		text = "You won";
+//		text = "You won";
 		buttonText = "Next level";
 		qDebug("Level available: %d, levelIndex = %d\n", m_levelAvailable, m_levelIndex);
 		if (m_levelAvailable <= m_levelIndex) {
@@ -631,10 +638,10 @@ void ApplicationUI::processFinish()
 			saveState();
 		}
 	} else {
-		text = "You lost";
+//		text = "You lost";
 		buttonText = "Retry";
 	}
-	m_gamePage->findChild<Label*>("menuTitle")->setText(text);
+//	m_gamePage->findChild<Label*>("menuTitle")->setText(text);
 	m_gamePage->findChild<Button*>("menuButton")->setText(buttonText);
 	m_gamePage->findChild<Container*>("menuContainer")->setVisible(true); // FIXME: need to reset labels
 }
