@@ -12,12 +12,13 @@ Recently Completed
 - Update robot picture
 - Level select icons
 
-Critical
 - Number of remaining moves needs to be visible!
+
+Critical
 - Better maps
 
 Development and Graphics
-- Improve Victory/Loss Screen
+- Improve Victory/Loss/menu Screen
 - Tutorial overlay and content
 - More levels
 

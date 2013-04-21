@@ -44,7 +44,7 @@ class ApplicationUI : public QObject
     Q_PROPERTY(bool isInF1 READ isInF1 NOTIFY isInF1Changed)
     Q_PROPERTY(bool isInF2 READ isInF2 NOTIFY isInF2Changed)
     Q_PROPERTY(bool isInF3 READ isInF3 NOTIFY isInF3Changed)
-    Q_PROPERTY(int tutorial READ tutorial NOTIFY tutorialChanged)
+    Q_PROPERTY(int tutorial READ tutorial WRITE setTutorial NOTIFY tutorialChanged)
 
 public:
     ApplicationUI(bb::cascades::Application *app);

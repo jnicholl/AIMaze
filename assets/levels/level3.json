@@ -12,5 +12,6 @@
 		1, 1, 1, 1, 1, 1, 1],
 "numFunctions": 2, 
 "functionLimit": [5, 3],
-"totalMoves": 4
+"totalMoves": 4,
+"tutorial": 3
 }

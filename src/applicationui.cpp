@@ -168,7 +168,7 @@ void ApplicationUI::compilePhaseDone()
 				qDebug() << "No container at " << QString("func%1_act%2").arg(i+1).arg(j + 1 + (DEFAULT_FUNCTION_SIZE - f->commandCount()));
 		}
 	}
-	m_gamePage->findChild<Container*>("progressBar")->setTranslationX(0);
+
 	m_phase = RUN;
 	Application::instance()->mainWindow()->setScreenIdleMode(ScreenIdleMode::KeepAwake);
 	QTimer::singleShot(3000, this, SLOT(unpause()));
@@ -302,6 +302,11 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 	setIsInFunction(-1);
 	Container *compileContainer = m_gamePage->findChild<Container*>("compilePhaseContainer");
 	compileContainer->setVisible(true);
+
+	m_gamePage->findChild<Container*>("tutorial1Container")->setProperty("state", 0);
+	m_gamePage->findChild<Container*>("tutorial2Container")->setProperty("state", 0);
+	m_gamePage->findChild<Container*>("tutorial3Container")->setProperty("state", 0);
+	m_gamePage->findChild<Container*>("progressBar")->setTranslationX(0);
 
 	m_gamePage->findChild<Label*>("menuTitle")->setText("Paused");
 	m_gamePage->findChild<Button*>("menuButton")->setText("Continue");

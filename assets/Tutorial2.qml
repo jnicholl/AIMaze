@@ -5,35 +5,39 @@ Container {
     property variant dimensions: Dimensions {}    
     property int state: 0
 
-    signal start
     signal showRun
     signal showCompile
+    signal hideTutorial
 
     preferredWidth: dimensions.screenWidth
     preferredHeight: dimensions.screenHeight
     layout: AbsoluteLayout {
     }
     
-    function showScreen()
-    {
-        if (state == 1) {
+    function showScreen() {
+        console.log("State = " + state);
+        if (state == 0) {
             tutorial.showCompile();
         }
-        if (state == 2) {
+        if (state == 1) {
             tutorial.showRun();
         }
-        if (state == 3) {
+        if (state == 2) {
             tutorial.showCompile();
+            tutorial.hideTutorial();
         }
     }
-    
+
     Button {
-        text:"Next"
-        onClicked:{
+        text: "Next"
+        onClicked: {
             state ++;
             showScreen();
+            if (state == 1) {
+                text = "Done"
+            }
         }
-        visible:state<3
+        visible: state < 2
         layoutProperties: AbsoluteLayoutProperties {
             positionX: 500
             positionY: 600
@@ -46,115 +50,75 @@ Container {
             state --;
             showScreen();
         }
-        visible:state>0
+        visible: state > 0
         layoutProperties: AbsoluteLayoutProperties {
             positionX: 50
             positionY: 600
         }
     }
 
-    Button {
-        text: "Start"
-        onClicked: {            
-            tutorial.start();
-        }
-        visible: state == 3
-        layoutProperties: AbsoluteLayoutProperties {
-            positionX: 213
-            positionY: 195
-        }
-    }
-
-	
     Label {
         preferredWidth: dimensions.playAreaWidth / 3
-        text: "EMUU"
+        text: "Add action to function"
+        multiline: true
+        textStyle.textAlign: TextAlign.Center
+        textStyle.color: Color.create("#BAEEFF")
+        layoutProperties: AbsoluteLayoutProperties {
+            positionX: 400
+            positionY: 100
+        }
+        visible: state == 0
+    }
+
+    Label {
+        preferredWidth: dimensions.playAreaWidth / 2
+        text: "Tap to remove "
+        multiline: true
+        textStyle.textAlign: TextAlign.Center
+        textStyle.color: Color.create("#BAEEFF")
+        layoutProperties: AbsoluteLayoutProperties {
+            positionX: 200
+            positionY: 520
+        }
+        visible:state==0
+    }
+
+    Label {
+        preferredWidth: 500
+        text: "All actions inside a function are executed within one move"
         multiline: true
         textStyle.textAlign: TextAlign.Center
         textStyle.color: Color.create("#BAEEFF")
         layoutProperties: AbsoluteLayoutProperties {
             positionX: 50
-            positionY: 340
+            positionY: 350
         }
-        visible:state==0
+        visible: state == 0
     }
     
     Label {
         preferredWidth: dimensions.playAreaWidth / 3
-        text: "Goal"
+        text: "View actions within functions"
         multiline: true
         textStyle.textAlign: TextAlign.Center
         textStyle.color: Color.create("#BAEEFF")
         layoutProperties: AbsoluteLayoutProperties {
-            positionX: 350
-            positionY: 240
+            positionX: 400
+            positionY: 400
         }
-        visible:state==0
-    }
-
-    Label {
-        preferredWidth: dimensions.playAreaWidth / 3
-        text: "Moves available"
-        multiline: true
-        textStyle.textAlign: TextAlign.Center
-        textStyle.color: Color.create("#BAEEFF")
-        layoutProperties: AbsoluteLayoutProperties {
-            positionX: 440
-            positionY: 100
-        }
-        visible:state==1
-    }
-
-    Container {
-        preferredWidth: 185
-        preferredHeight: 40
-        layoutProperties: AbsoluteLayoutProperties {
-            positionX: 210
-            positionY: 0
-        }
-        visible:state==1
-        background: Color.create("#BAEEFF")
-        opacity:0.5
-    }
-    
-    Label {
-        preferredWidth: dimensions.playAreaWidth / 4
-        text: "Add actions to queue"
-        multiline: true
-        textStyle.textAlign: TextAlign.Center
-        textStyle.color: Color.create("#BAEEFF")
-        layoutProperties: AbsoluteLayoutProperties {
-            positionX: dimensions.playAreaWidth * 3 / 4
-            positionY: dimensions.playAreaHeight / 4
-        }
-        visible:state==2
+        visible: state == 1
     }
 
     Label {
         preferredWidth: dimensions.playAreaWidth
-        text: "Pending actions"
+        text: "Add function to queue"
         multiline: true
         textStyle.textAlign: TextAlign.Center
         textStyle.color: Color.create("#BAEEFF")
         layoutProperties: AbsoluteLayoutProperties {
-            positionX: 100
-            positionY: 30
+            positionX: 120
+            positionY: 325
         }
-        visible: state == 2
-    }
-
-    Label {
-        preferredWidth: dimensions.playAreaWidth
-        text: "Once you start the game, there is a limited amount of time to enter your moves as they are executed.
-        
-Press Start to begin"
-        multiline: true
-        textStyle.textAlign: TextAlign.Center
-        textStyle.color: Color.create("#BAEEFF")
-        layoutProperties: AbsoluteLayoutProperties {
-            positionX: 0
-            positionY: dimensions.playAreaHeight / 2
-        }
-        visible: state == 3
+        visible: state == 1
     }
 }

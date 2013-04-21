@@ -403,20 +403,25 @@ Page {
             preferredHeight: dimensions.screenHeight
 
             Container {
+                id: buttonContainer
+                    
                 preferredWidth: dimensions.compileMapWidth
                 preferredHeight: dimensions.compileMapHeight
                 layout: DockLayout {
                 }
 
                 Button {
+                    id: startButton
                     text: "Start"
                     opacity: 0.7
                     verticalAlignment: VerticalAlignment.Center
                     horizontalAlignment: HorizontalAlignment.Center
                     onClicked: {
+                        console.log("Clicked Start Button");
                         compilePhaseContainer.setVisible(false);
                         _app.compilePhaseDone();
                     }
+                    visible:_app.tutorial==0 
                 }
             }
             Container {
@@ -555,9 +560,44 @@ Page {
         }
         
         Tutorial1 {
-            id: tutorialContainer
-            objectName: "tutorialContainer"
-            visible: (_app.tutorial == 1 && compilePhaseContainer.visible)
+            id: tutorial1Container
+            objectName: "tutorial1Container"
+            visible: (_app.tutorial == 1)
+            onStart: {
+                console.log("Started");
+                _app.tutorial = 0;
+                startButton.clicked();
+            }        
+            onShowRun: {
+                compilePhaseContainer.visible = false;
+            }
+            onShowCompile: {
+                compilePhaseContainer.visible = true;
+            }
+        }
+
+        Tutorial2 {
+            id: tutorial2Container
+            objectName: "tutorial2Container"
+            visible: (_app.tutorial == 2)
+            onShowRun: {
+                compilePhaseContainer.visible = false;
+            }
+            onShowCompile: {
+                compilePhaseContainer.visible = true;
+            }
+            onHideTutorial: {
+                _app.tutorial = 0;
+            }
+        }
+
+        Tutorial3 {
+            id: tutorial3Container
+            objectName: "tutorial3Container"
+            visible: (_app.tutorial == 3)
+            onHideTutorial: {
+                _app.tutorial = 0;
+            }
         }
 
         Container {
