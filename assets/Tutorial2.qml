@@ -18,9 +18,11 @@ Container {
         console.log("State = " + state);
         if (state == 0) {
             tutorial.showCompile();
+            next.text = "Next";
         }
         if (state == 1) {
             tutorial.showRun();
+            next.text = "Done";
         }
         if (state == 2) {
             tutorial.showCompile();
@@ -29,13 +31,11 @@ Container {
     }
 
     Button {
+        id: next
         text: "Next"
         onClicked: {
             state ++;
             showScreen();
-            if (state == 1) {
-                text = "Done"
-            }
         }
         visible: state < 2
         layoutProperties: AbsoluteLayoutProperties {

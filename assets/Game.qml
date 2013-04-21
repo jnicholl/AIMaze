@@ -599,6 +599,51 @@ Page {
                 _app.tutorial = 0;
             }
         }
+        
+        Container {
+            id: creditsContainer
+            objectName: "creditsContainer"
+            visible: true
+            preferredWidth: dimensions.screenWidth
+            preferredHeight: dimensions.screenHeight
+            background: Color.Black
+            layout: DockLayout {
+            }
+            ImageView {
+                horizontalAlignment: HorizontalAlignment.Center
+                verticalAlignment: VerticalAlignment.Top
+                imageSource: "asset:///images/title.png"
+            }
+            Container {
+                verticalAlignment: VerticalAlignment.Center
+                horizontalAlignment: HorizontalAlignment.Center
+                background: Color.Black
+                layout: StackLayout {
+                }
+
+                Label {
+                    horizontalAlignment: HorizontalAlignment.Center
+                    verticalAlignment: VerticalAlignment.Center
+                    textStyle.textAlign: TextAlign.Center
+                    multiline: true
+                    text: "You have completed all levels!
+Thank you for playing!"
+                    bottomMargin: 20
+                }
+                Label {
+                    text: "Game created by Jeremy Nicholl"
+                }
+            }
+            Button {
+                horizontalAlignment: HorizontalAlignment.Fill
+                verticalAlignment: VerticalAlignment.Bottom
+                text: "Menu"
+                onClicked: {
+                    creditsContainer.setVisible(false);
+                    _app.back();
+                }
+            }
+        }
 
         Container {
             id: menuContainer
@@ -608,7 +653,7 @@ Page {
             background: Color.Black
             layout: DockLayout {
             }
-            visible: true
+            visible: false
             ImageView {
                 horizontalAlignment: HorizontalAlignment.Center
                 verticalAlignment: VerticalAlignment.Top

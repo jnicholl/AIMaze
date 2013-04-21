@@ -314,6 +314,7 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 	m_gamePage->findChild<Container*>("tutorial2Container")->setProperty("state", 0);
 	m_gamePage->findChild<Container*>("tutorial3Container")->setProperty("state", 0);
 	m_gamePage->findChild<Container*>("progressBar")->setTranslationX(0);
+	m_gamePage->findChild<Container*>("creditsContainer")->setVisible(false);
 
 	m_gamePage->findChild<Button*>("menuButton")->setText("Continue");
 	m_gamePage->findChild<Container*>("menuContainer")->setVisible(false);
@@ -630,6 +631,11 @@ void ApplicationUI::processFinish()
 	Application::instance()->mainWindow()->setScreenIdleMode(ScreenIdleMode::Normal);
 	QString text, buttonText;
 	if (win) {
+		int levelCount = m_levelList->dataModel()->childCount(QVariantList());
+		if (m_levelIndex >= levelCount-1) {
+			m_gamePage->findChild<Container*>("creditsContainer")->setVisible(true);
+			return;
+		}
 //		text = "You won";
 		buttonText = "Next level";
 		qDebug("Level available: %d, levelIndex = %d\n", m_levelAvailable, m_levelIndex);
