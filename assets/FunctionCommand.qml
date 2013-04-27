@@ -13,6 +13,7 @@ Container {
 
     ImageView {
         id: view
+        visible: showing
     }
 
     attachedObjects: [

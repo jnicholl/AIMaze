@@ -280,49 +280,49 @@ Page {
             }
         }
         
-        SideActionBar {
-            id: sidebar
-            layoutProperties: AbsoluteLayoutProperties {
-                positionX: dimensions.playAreaWidth
-                positionY: 0
-            }
-            preferredHeight: dimensions.screenHeight
-            preferredWidth: dimensions.sidebarWidth
-            topPadding: dimensions.itemPadding + 4
-            bottomPadding: dimensions.itemPadding
-            
-            functionCount: _app.functionCount
-            showViewFunctions: !compilePhaseContainer.visible
-            
-            onForwardPressed: {
-                _app.tapForward();
-            }
-            onLeftPressed: {
-                _app.tapLeft();
-            }
-            onRightPressed: {
-                _app.tapRight();
-            }
-            onFunctionPressed: {
-                switch (func) {
-                case 1:
-                    _app.tapF1();
-                    break;
-                case 2:
-                    _app.tapF2();
-                    break;
-                case 3:
-                    _app.tapF3();
-                    break;
-                }
-            }
-            onViewFunctionsPressed: {
-                _app.tapViewFunctions();
-            }
-        }
+//        SideActionBar {
+//            id: sidebar
+//            layoutProperties: AbsoluteLayoutProperties {
+//                positionX: dimensions.playAreaWidth
+//                positionY: 0
+//            }
+//            preferredHeight: dimensions.screenHeight
+//            preferredWidth: dimensions.sidebarWidth
+//            topPadding: dimensions.itemPadding + 4
+//            bottomPadding: dimensions.itemPadding
+//            
+//            functionCount: _app.functionCount
+//            showViewFunctions: !compilePhaseContainer.visible
+//            
+//            onForwardPressed: {
+//                _app.tapForward();
+//            }
+//            onLeftPressed: {
+//                _app.tapLeft();
+//            }
+//            onRightPressed: {
+//                _app.tapRight();
+//            }
+//            onFunctionPressed: {
+//                switch (func) {
+//                case 1:
+//                    _app.tapF1();
+//                    break;
+//                case 2:
+//                    _app.tapF2();
+//                    break;
+//                case 3:
+//                    _app.tapF3();
+//                    break;
+//                }
+//            }
+//            onViewFunctionsPressed: {
+//                _app.tapViewFunctions();
+//            }
+//        }
 
         Container {
-//            id: sidebar
+            id: sidebar
             layoutProperties: AbsoluteLayoutProperties {
                 positionX: dimensions.playAreaWidth
                 positionY: 0

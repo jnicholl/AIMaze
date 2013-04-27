@@ -20,6 +20,7 @@
 #include "map.h"
 #include "robot.h"
 #include "function.h"
+#include "QueueManager.h"
 #include <bb/cascades/ScreenIdleMode>
 
 using namespace bb::cascades;
@@ -32,15 +33,12 @@ using namespace bb::data;
 ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 : QObject(app)
 , m_levelList(0)
-, m_gamePage(0)
 , m_navigationPane(0)
-, m_qmlQueueCommand(0)
-, m_queueContainer(0)
+, m_gamePage(0)
 , m_mapArea(0)
 , m_progressAnimation(0)
-, m_queueCount(0)
+, m_queueManager(0)
 , m_levelIndex(0)
-, m_levelAvailable(0)
 , m_map(0)
 , m_robot(0)
 , m_phase(MENU)
@@ -52,17 +50,22 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 , m_isInF2(false)
 , m_isInF3(false)
 , m_highlightedContainer(0)
-, m_tutorial(0)
 {
+	// Connect application signals so we show the menu to pause
 	QObject::connect(Application::instance(), SIGNAL(swipeDown()), this, SLOT(showMenu()));
 	QObject::connect(Application::instance(), SIGNAL(thumbnail()), this, SLOT(showMenu()));
 	QObject::connect(Application::instance(), SIGNAL(invisible()), this, SLOT(showMenu()));
-	loadSavedState();
+
+	// Load any stored game state
+	QObject::connect(&m_gameState, SIGNAL(gameStateChanged()), this, SLOT(onGameStateChanged()));
+	m_gameState.load();
+
+	// Connect tutorial manager signals
+	QObject::connect(&m_tutorialManager, SIGNAL(tutorialChanged(int)), this, SIGNAL(tutorialChanged(int)));
 
 	// create scene document from main.qml asset
     // set parent to created document to ensure it exists for the whole application lifetime
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
-
     qml->setContextProperty("_app", this);
 
     // create root object for the UI
@@ -73,53 +76,22 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
     // set created root object as a scene
     app->setScene(m_navigationPane);
 
+    // Connect up timers.
     QObject::connect(&m_timer, SIGNAL(timeout()), this, SLOT(timerFired()));
     m_finishTimer.setSingleShot(true);
     QObject::connect(&m_finishTimer, SIGNAL(timeout()), this, SLOT(unpause()));
 }
 
-void ApplicationUI::loadSavedState()
-{
-	QString filePath(QDir::currentPath() + "/data/levelState.json");
-	if (QFile::exists(filePath)) {
-		JsonDataAccess jda;
-		QVariantMap state = jda.load(filePath).toMap();
-		if (jda.hasError())
-			return;
-		if (state.contains("levelAvailable")) {
-			int levelAvailable = state["levelAvailable"].toInt();
-			if (levelAvailable > 0) {
-				setLevelAvailable(levelAvailable);
-			}
-		}
-	}
-	qDebug() << "Level available" << m_levelAvailable;
-}
-
-void ApplicationUI::saveState()
-{
-	qDebug() << "saving state to " << QDir::currentPath() + "/data/levelState.json";
-	QVariantMap state;
-	state["levelAvailable"] = m_levelAvailable;
-	QFile file(QDir::currentPath() + "/data/levelState.json");
-	if (file.open(QIODevice::WriteOnly)) {
-		qDebug() << "opened file okay";
-		JsonDataAccess jda;
-		jda.save(state, &file);
-		if (jda.hasError()) {
-			qDebug("Failed to save: Json error\n");
-		} else {
-			qDebug("Saved");
-		}
-	}
-}
-
+// Takes us back to the level selection screen.
+// Generally should only be called from the menu.
 void ApplicationUI::back()
 {
 	m_phase = MENU;
 	m_navigationPane->pop();
 }
 
+// Shows the menu ONLY if we are in run or compile phases.
+// Showing the menu also pauses the game from the run phase.
 void ApplicationUI::showMenu()
 {
 	if (m_phase == RUN || m_phase == COMPILE) {
@@ -128,6 +100,7 @@ void ApplicationUI::showMenu()
 	}
 }
 
+// Pauses the game by stopping both timers and the animation, if in run phase.
 // FIXME: Should really store the remaining time and start the next tick as much shorter.
 void ApplicationUI::pause()
 {
@@ -141,6 +114,8 @@ void ApplicationUI::pause()
 	}
 }
 
+// Resumes the game if we are in run phase, starting the timer and progress animation.
+// We ignore the finish timer since it is only used at game start?
 void ApplicationUI::unpause()
 {
 	if (m_phase == RUN) {
@@ -150,27 +125,32 @@ void ApplicationUI::unpause()
 	}
 }
 
+// Prepare for the run phase.
+// - Set up all the function slideout containers
+// - Change the phase
+// - Prevent the screen from dimming
+// - Start the finish timer to give some time before the real timer starts.
 void ApplicationUI::compilePhaseDone()
 {
 	Container *container = 0;
 	for (int i=0; i<3; i++) {
 		for (int j=0; j<DEFAULT_FUNCTION_SIZE; j++) {
-			container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(i+1).arg(j+1));
+			container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(i).arg(j+1));
 			if (container)
 				container->setProperty("actionVisible", false);
 			else
-				qDebug() << "No container at " << QString("func%1_act%2").arg(i+1).arg(j+1);
+				qDebug() << "No container at " << QString("func%1_act%2").arg(i).arg(j+1);
 		}
 	}
 	for (int i=0; i<m_functionCount; i++) {
 		Function *f = m_functions[i];
 		for (int j=0; j<f->commandCount(); j++) {
-			container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(i+1).arg(j + 1 + (DEFAULT_FUNCTION_SIZE - f->commandCount())));
+			container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(i).arg(j + 1 + (DEFAULT_FUNCTION_SIZE - f->commandCount())));
 			if (container) {
 				container->setProperty("imageSource", getImageForCommand(f->at(j)));
 				container->setProperty("actionVisible", true);
 			} else
-				qDebug() << "No container at " << QString("func%1_act%2").arg(i+1).arg(j + 1 + (DEFAULT_FUNCTION_SIZE - f->commandCount()));
+				qDebug() << "No container at " << QString("func%1_act%2").arg(i).arg(j + 1 + (DEFAULT_FUNCTION_SIZE - f->commandCount()));
 		}
 	}
 
@@ -178,8 +158,8 @@ void ApplicationUI::compilePhaseDone()
 	Application::instance()->mainWindow()->setScreenIdleMode(ScreenIdleMode::KeepAwake);
 
 	m_finishTimer.start(3000);
-	//QTimer::singleShot(3000, this, SLOT(unpause()));
 }
+
 
 void ApplicationUI::setupLevel(const QVariantMap &levelData)
 {
@@ -215,8 +195,7 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 	int endY = levelData["endY"].toInt();
 	QVariantList mapData = levelData["data"].toList();
 	int moves = levelData["totalMoves"].toInt();
-	qDebug("Setting tutorial = %d\n", levelData["tutorial"].toInt());
-	setTutorial(levelData["tutorial"].toInt()); // will return 0 if no tutorial field
+	m_tutorialManager.setTutorial(levelData["tutorial"].toInt()); // will return 0 if no tutorial field
 
 	// Sanity check for reasonable map data
 	if (width < 0 || width > MAX_WIDTH || height < 0 || height > MAX_HEIGHT || width * height != mapData.count()) {
@@ -279,34 +258,41 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 
 void ApplicationUI::setupQueue()
 {
-	if (!m_qmlQueueCommand) {
-		m_qmlQueueCommand = QmlDocument::create("asset:///QueueCommand.qml").parent(this);
-		m_qmlQueueCommand->setContextProperty("_app", this);
-	}
+	if (!m_queueManager)
+		m_queueManager = new QueueManager(this, m_gamePage, this);
 
-	m_queueContainer = m_gamePage->findChild<Container*>("queueContainer");
-	if (!m_queueContainer) qFatal("Failed to find queue container");
-
-	m_queue.clear();
-	m_queueContainer->removeAll();
-	m_queueCount = 0;
-
-	for (int i=0; i<QUEUE_LIMIT; i++) {
-		m_queueCommands[i] = CMD_EMPTY;
-		Container *queueObject = m_qmlQueueCommand->createRootObject<Container>();
-		queueObject->setProperty("index", i);
-		queueObject->setProperty("text", QString::number(m_queueCommands[i]));
-		m_queueContainer->add(queueObject);
-		m_queue.append(queueObject);
-	}
+	m_queueManager->reset();
+//	if (!m_qmlQueueCommand) {
+//		m_qmlQueueCommand = QmlDocument::create("asset:///QueueCommand.qml").parent(this);
+//		m_qmlQueueCommand->setContextProperty("_app", this);
+//	}
+//
+//	m_queueContainer = m_gamePage->findChild<Container*>("queueContainer");
+//	if (!m_queueContainer) qFatal("Failed to find queue container");
+//
+//	m_queue.clear();
+//	m_queueContainer->removeAll();
+//	m_queueCount = 0;
+//
+//	for (int i=0; i<QUEUE_LIMIT; i++) {
+//		m_queueCommands[i] = CMD_EMPTY;
+//		Container *queueObject = m_qmlQueueCommand->createRootObject<Container>();
+//		queueObject->setProperty("index", i);
+//		queueObject->setProperty("text", QString::number(m_queueCommands[i]));
+//		m_queueContainer->add(queueObject);
+//		m_queue.append(queueObject);
+//	}
 }
 
+// Main entry point into a new level. This is what gets called from the level select listview.
 void ApplicationUI::startLevel(const QVariantList &indexPath)
 {
+	// We only need to create the game page once.
 	if (!m_gamePage) {
 		QmlDocument *qml = QmlDocument::create("asset:///Game.qml").parent(this);
 		qml->setContextProperty("_app", this);
 		m_gamePage = qml->createRootObject<Page>();
+		m_tutorialManager.init(m_gamePage);
 		m_progressAnimation = m_gamePage->findChild<SequentialAnimation*>("progressAnimation");
 	}
 
@@ -322,9 +308,7 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 	Container *compileContainer = m_gamePage->findChild<Container*>("compilePhaseContainer");
 	compileContainer->setVisible(true);
 
-	m_gamePage->findChild<Container*>("tutorial1Container")->setProperty("state", 0);
-	m_gamePage->findChild<Container*>("tutorial2Container")->setProperty("state", 0);
-	m_gamePage->findChild<Container*>("tutorial3Container")->setProperty("state", 0);
+	m_tutorialManager.reset();
 	m_gamePage->findChild<Container*>("progressBar")->setTranslationX(0);
 	m_gamePage->findChild<Container*>("creditsContainer")->setVisible(false);
 
@@ -386,26 +370,19 @@ QString ApplicationUI::getImageForCommand(CommandType type)
 	return text;
 }
 
-void ApplicationUI::setQueueValue(int i, CommandType type)
-{
-	qDebug() << "Set " << i << " from " << m_queueCommands[i] << " to " << type;
-	m_queueCommands[i] = type;
-	m_queue[i]->setProperty("imageSource", getImageForCommand(type));
-}
+//void ApplicationUI::setQueueValue(int i, CommandType type)
+//{
+//	qDebug() << "Set " << i << " from " << m_queueCommands[i] << " to " << type;
+//	m_queueCommands[i] = type;
+//	m_queue[i]->setProperty("imageSource", getImageForCommand(type));
+//}
 
 void ApplicationUI::addQueuedCommand(CommandType type)
 {
 	if (type == CMD_EMPTY) return;
 
 	if (m_phase == RUN) {
-		for (int i=0; i<QUEUE_LIMIT; i++) {
-			if (m_queueCommands[i] == CMD_EMPTY) {
-				setQueueValue(i, type);
-				m_queueCount++;
-				break;
-			}
-		}
-		// TODO: return failure to show user queue full?
+		m_queueManager->add(type);
 	} else if (m_phase == COMPILE) {
 		qDebug("Add command to function %d\n", m_selectedFunction);
 		if (m_selectedFunction >= 0 && m_selectedFunction <= m_functions.count()) {
@@ -490,21 +467,22 @@ void ApplicationUI::tapViewFunctions()
 	setShouldShowFunctions(!m_shouldShowFunctions);
 }
 
-void ApplicationUI::removeQueuedCommand(int index, bool force)
-{
-	qDebug() << "Removing queue command at " << index << " (queueCount = " << m_queueCount << ")";
-	if (index < 0) return;
-	if (index >= m_queueCount) return;
-	if (m_queueCommands[index] == CMD_EMPTY) return;
-	if (!force && index == 0 && !m_stack.empty()) return;
-
-	for (int i=index; i<QUEUE_LIMIT-1; i++) {
-		setQueueValue(i, m_queueCommands[i+1]);
-	}
-
-	setQueueValue(QUEUE_LIMIT-1, CMD_EMPTY);
-	m_queueCount--;
-}
+//void ApplicationUI::removeQueuedCommand(int index, bool force)
+//{
+//	m_queueManager->remove(index, force);
+////	qDebug() << "Removing queue command at " << index << " (queueCount = " << m_queueCount << ")";
+////	if (index < 0) return;
+////	if (index >= m_queueCount) return;
+////	if (m_queueCommands[index] == CMD_EMPTY) return;
+////	if (!force && index == 0 && !m_stack.empty()) return;
+////
+////	for (int i=index; i<QUEUE_LIMIT-1; i++) {
+////		setQueueValue(i, m_queueCommands[i+1]);
+////	}
+////
+////	setQueueValue(QUEUE_LIMIT-1, CMD_EMPTY);
+////	m_queueCount--;
+//}
 
 void ApplicationUI::removeFunctionCommand(int index)
 {
@@ -519,12 +497,12 @@ void ApplicationUI::highlightFunction(int function, int pc)
 		m_highlightedContainer->setProperty("highlighted", false);
 	}
 
-	Container *container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(function+1).arg((DEFAULT_FUNCTION_SIZE-m_functions[function]->commandCount())+pc+1));
+	Container *container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(function).arg((DEFAULT_FUNCTION_SIZE-m_functions[function]->commandCount())+pc+1));
 	if (container) {
 		m_highlightedContainer = container;
 		m_highlightedContainer->setProperty("highlighted", true);
 	} else {
-		qDebug() << "Unable to find container: " << QString("func%1_act%2").arg(function+1).arg((DEFAULT_FUNCTION_SIZE-m_functions[function]->commandCount())+pc+1);
+		qDebug() << "Unable to find container: " << QString("func%1_act%2").arg(function).arg((DEFAULT_FUNCTION_SIZE-m_functions[function]->commandCount())+pc+1);
 	}
 }
 
@@ -533,7 +511,7 @@ void ApplicationUI::timerFired()
 	FunctionRunner *frame = 0;
 	bool shouldRemove = true;
 	bool countsAsMove = true;
-	CommandType cmd = m_queueCommands[0];
+	CommandType cmd = m_queueManager->peek();
 
 	if (!m_stack.empty()) {
 		frame = m_stack.top();
@@ -542,8 +520,8 @@ void ApplicationUI::timerFired()
 			delete frame;
 			if (m_stack.empty()) {
 				// Finished all function calls, remove the function on the queue
-				removeQueuedCommand(0, true);
-				cmd = m_queueCommands[0];
+				m_queueManager->remove(0, true);
+				cmd = m_queueManager->peek();
 				break;
 			}
 			frame = m_stack.top();
@@ -602,7 +580,7 @@ void ApplicationUI::timerFired()
 	}
 
 	if (shouldRemove)
-		removeQueuedCommand(0, true);
+		m_queueManager->remove(0, true);
 
 	if (countsAsMove) {
 		m_robot->decrementMoves();
@@ -649,11 +627,7 @@ void ApplicationUI::processFinish()
 		}
 //		text = "You won";
 		buttonText = "Next level";
-		qDebug("Level available: %d, levelIndex = %d\n", m_levelAvailable, m_levelIndex);
-		if (m_levelAvailable <= m_levelIndex) {
-			setLevelAvailable(m_levelIndex+1);
-			saveState();
-		}
+		m_gameState.setLevelComplete(m_levelIndex);
 	} else {
 //		text = "You lost";
 		buttonText = "Retry";

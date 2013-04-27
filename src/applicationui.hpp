@@ -10,6 +10,9 @@
 #include <bb/cascades/OrientationSupport>
 #include <bb/device/DisplayInfo>
 
+#include "GameState.h"
+#include "TutorialManager.h"
+
 namespace bb {
 	namespace cascades {
 		class Application;
@@ -26,6 +29,7 @@ class Map;
 class Robot;
 class Function;
 class FunctionRunner;
+class QueueManager;
 
 #define QUEUE_LIMIT 5
 
@@ -85,7 +89,7 @@ public:
     Q_SLOT void tapViewFunctions();
 
     // Click on queued command
-    Q_SLOT void removeQueuedCommand(int index, bool force=false);
+//    Q_SLOT void removeQueuedCommand(int index, bool force=false);
 
     // Click on function command (to remove it)
     Q_SLOT void removeFunctionCommand(int index);
@@ -105,12 +109,9 @@ public:
     	}
     }
 
-    int levelAvailable() const { return m_levelAvailable; }
-    void setLevelAvailable(int available) {
-    	if (available != m_levelAvailable) {
-    		m_levelAvailable = available;
-    		emit levelAvailableChanged(m_levelAvailable);
-    	}
+    int levelAvailable() const { return m_gameState.levelAvailable(); }
+    Q_SLOT void onGameStateChanged() {
+    	emit levelAvailableChanged(m_gameState.levelAvailable());
     }
 
     bool shouldShowFunctions() const { return m_shouldShowFunctions; }
@@ -142,6 +143,7 @@ public:
     		emit isInF3Changed(m_isInF3);
     	}
     }
+    bool isFunctionStackEmpty() const { return m_stack.empty(); }
     void setIsInFunction(int index) {
     	qDebug() << "set is in function " << index;
     	switch (index) {
@@ -170,13 +172,10 @@ public:
 
     Q_SLOT void processFinish();
 
-    int tutorial() const { return m_tutorial; }
-    void setTutorial(int tutorial) {
-    	if (tutorial != m_tutorial) {
-    		m_tutorial = tutorial;
-    		emit tutorialChanged(m_tutorial);
-    	}
-    }
+    int tutorial() const { return m_tutorialManager.tutorial(); }
+    void setTutorial(int tutorial) { m_tutorialManager.setTutorial(tutorial); }
+
+    static QString getImageForCommand(CommandType type);
 
 signals:
 	void functionCountChanged(int);
@@ -191,32 +190,43 @@ private:
 	void loadSavedState();
 	void saveState();
 
-    void setQueueValue(int i, CommandType type);
+//    void setQueueValue(int i, CommandType type);
     void setupQueue();
 
     void setupLevel(const QVariantMap &levelData);
 
     void highlightFunction(int func, int pc);
 
-    static QString getImageForCommand(CommandType type);
-
+    // Level selection screen list
     bb::cascades::ListView *m_levelList;
-    bb::cascades::Page *m_gamePage;
+    // Top-level navigation pane
     bb::cascades::NavigationPane *m_navigationPane;
-    bb::cascades::QmlDocument *m_qmlQueueCommand;
-    bb::cascades::Container *m_queueContainer;
+
+    // Actual game page, created once and reset each level
+    bb::cascades::Page *m_gamePage;
+
+    // Base QML document for creating the objects inside the queue, used to
+    // create objects each level.
+//    bb::cascades::QmlDocument *m_qmlQueueCommand;
+//    bb::cascades::Container *m_queueContainer;
     bb::cascades::Container *m_mapArea;
 
     bb::cascades::SequentialAnimation *m_progressAnimation;
 
-    int m_queueCount;
-    CommandType m_queueCommands[QUEUE_LIMIT];
-    QList<bb::cascades::Container*> m_queue;
+    QueueManager *m_queueManager;
+//    int m_queueCount;
+//    CommandType m_queueCommands[QUEUE_LIMIT];
+//    QList<bb::cascades::Container*> m_queue;
+
+    // Used for each action taken during the level
     QTimer m_timer;
+
+    // Single shot timer used to queue up the starting process
     QTimer m_finishTimer;
 
     int m_levelIndex;
-    int m_levelAvailable;
+    GameState m_gameState;
+
     Map *m_map;
     Robot *m_robot;
 
@@ -243,7 +253,7 @@ private:
     bool m_isInF3;
     bb::cascades::Container *m_highlightedContainer;
 
-    int m_tutorial; // 0 for no tutorial, otherwise 1,2,3.
+    TutorialManager m_tutorialManager;
 };
 
 #endif /* ApplicationUI_HPP_ */
