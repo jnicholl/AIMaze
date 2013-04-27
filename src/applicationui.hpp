@@ -145,17 +145,17 @@ public:
     void setIsInFunction(int index) {
     	qDebug() << "set is in function " << index;
     	switch (index) {
-    	case 0:
+    	case 1:
 			setIsInF1(true);
 			setIsInF2(false);
 			setIsInF3(false);
 			break;
-    	case 1:
+    	case 2:
 			setIsInF1(false);
 			setIsInF2(true);
 			setIsInF3(false);
 			break;
-    	case 2:
+    	case 3:
 			setIsInF1(false);
 			setIsInF2(false);
 			setIsInF3(true);

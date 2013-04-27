@@ -279,9 +279,50 @@ Page {
                 leftPadding: dimensions.sidebarPadding * 4/3
             }
         }
+        
+        SideActionBar {
+            id: sidebar
+            layoutProperties: AbsoluteLayoutProperties {
+                positionX: dimensions.playAreaWidth
+                positionY: 0
+            }
+            preferredHeight: dimensions.screenHeight
+            preferredWidth: dimensions.sidebarWidth
+            topPadding: dimensions.itemPadding + 4
+            bottomPadding: dimensions.itemPadding
+            
+            functionCount: _app.functionCount
+            showViewFunctions: !compilePhaseContainer.visible
+            
+            onForwardPressed: {
+                _app.tapForward();
+            }
+            onLeftPressed: {
+                _app.tapLeft();
+            }
+            onRightPressed: {
+                _app.tapRight();
+            }
+            onFunctionPressed: {
+                switch (func) {
+                case 1:
+                    _app.tapF1();
+                    break;
+                case 2:
+                    _app.tapF2();
+                    break;
+                case 3:
+                    _app.tapF3();
+                    break;
+                }
+            }
+            onViewFunctionsPressed: {
+                _app.tapViewFunctions();
+            }
+        }
 
         Container {
-            id: sidebar
+//            id: sidebar
             layoutProperties: AbsoluteLayoutProperties {
                 positionX: dimensions.playAreaWidth
                 positionY: 0
@@ -327,7 +368,7 @@ Page {
 
             SidebarCommand {
                 id: cmdF1
-                visible: _app.functionCount > 0
+                visible: _app.functionCount > 1
                 ImageButton {
                     defaultImageSource: "asset:///images/f1.png"
                     pressedImageSource: "asset:///images/f1p.png"
@@ -339,7 +380,7 @@ Page {
 
             SidebarCommand {
                 id: cmdF2
-                visible: _app.functionCount > 1
+                visible: _app.functionCount > 2
                 ImageButton {
                     defaultImageSource: "asset:///images/f2.png"
                     pressedImageSource: "asset:///images/f2p.png"
@@ -351,7 +392,7 @@ Page {
 
             SidebarCommand {
                 id: cmdF3
-                visible: _app.functionCount > 2
+                visible: _app.functionCount > 3
                 ImageButton {
                     defaultImageSource: "asset:///images/f3.png"
                     pressedImageSource: "asset:///images/f3p.png"
@@ -363,7 +404,7 @@ Page {
 
             SidebarCommand {
                 id: cmdViewFunctions
-                visible: _app.functionCount > 0 && compilePhaseContainer.visible == false
+                visible: _app.functionCount > 1 && compilePhaseContainer.visible == false
                 ImageButton {
                     defaultImageSource: "asset:///images/viewfunctions.png"
                     pressedImageSource: "asset:///images/viewfunctionsp.png"
@@ -396,169 +437,24 @@ Page {
             }
         }
 
-        Container {
-            id: compilePhaseContainer
-            objectName: "compilePhaseContainer"
-            preferredWidth: dimensions.playAreaWidth
-            preferredHeight: dimensions.screenHeight
-
-            Container {
-                id: buttonContainer
-                    
-                preferredWidth: dimensions.compileMapWidth
-                preferredHeight: dimensions.compileMapHeight
-                layout: DockLayout {
-                }
-
-                Button {
-                    id: startButton
-                    text: "Start"
-                    opacity: 0.7
-                    verticalAlignment: VerticalAlignment.Center
-                    horizontalAlignment: HorizontalAlignment.Center
-                    onClicked: {
-                        console.log("Clicked Start Button");
-                        compilePhaseContainer.setVisible(false);
-                        _app.compilePhaseDone();
-                    }
-                    visible:_app.tutorial==0 
-                }
+		CompilePhase {
+		    id: compilePhaseContainer
+		    objectName: "compilePhaseContainer"
+		    preferredWidth: dimensions.playAreaWidth
+		    preferredHeight: dimensions.screenHeight
+            startButtonVisible: _app.tutorial == 0
+		    onStart: {
+                compilePhaseContainer.setVisible(false);
+                _app.compilePhaseDone();
             }
-            Container {
-                objectName: "compileFunctionContainer"
-                preferredWidth: dimensions.compileMapWidth
-                preferredHeight: dimensions.compileFunctionHeight
-                //background: Color.Black // FIXME: Image
-                layout: DockLayout {
-                }
-
-                Container {
-                    verticalAlignment: VerticalAlignment.Center
-                    horizontalAlignment: HorizontalAlignment.Center
-
-                    Container {
-                        preferredWidth: dimensions.compileMapWidth
-                        preferredHeight: dimensions.cmdHeight
-                        bottomMargin: dimensions.itemPadding
-                        layout: DockLayout {
-                        }
-
-                        Container {
-                            verticalAlignment: VerticalAlignment.Center
-                            horizontalAlignment: HorizontalAlignment.Center
-                            layout: StackLayout {
-                                orientation: LayoutOrientation.LeftToRight
-                            }
-
-                            FunctionCommand {
-                                objectName: "functionHeader"
-                                background: highlight.imagePaint
-                                gestureHandlers: [
-                                    TapHandler {
-                                        onTapped: {
-                                            _app.selectNextFunction();
-                                        }
-                                    }
-                                ]
-                                attachedObjects: [
-	                                    ImagePaintDefinition {
-	                                    id: highlight
-	                                    imageSource: "asset:///images/highlight.png"
-	                                }
-                                ]
-                            }
-                            FunctionCommand {
-                                objectName: "functionAction1"
-                                gestureHandlers: [
-                                    TapHandler {
-                                        onTapped: {
-                                            _app.removeFunctionCommand(0);
-                                        }
-                                    }
-                                ]
-                            }
-                            FunctionCommand {
-                                objectName: "functionAction2"
-                                gestureHandlers: [
-                                    TapHandler {
-                                        onTapped: {
-                                            _app.removeFunctionCommand(1);
-                                        }
-                                    }
-                                ]
-                            }
-                            FunctionCommand {
-                                objectName: "functionAction3"
-                                gestureHandlers: [
-                                    TapHandler {
-                                        onTapped: {
-                                            _app.removeFunctionCommand(2);
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    }
-
-                    Container {
-                        preferredWidth: dimensions.compileMapWidth
-                        preferredHeight: dimensions.cmdHeight
-                        layout: DockLayout {
-                        }
-
-                        Container {
-                            verticalAlignment: VerticalAlignment.Center
-                            horizontalAlignment: HorizontalAlignment.Center
-                            layout: StackLayout {
-                                orientation: LayoutOrientation.LeftToRight
-                            }
-
-                            FunctionCommand {
-                                objectName: "functionAction4"
-                                gestureHandlers: [
-                                    TapHandler {
-                                        onTapped: {
-                                            _app.removeFunctionCommand(3);
-                                        }
-                                    }
-                                ]
-                            }
-                            FunctionCommand {
-                                objectName: "functionAction5"
-                                gestureHandlers: [
-                                    TapHandler {
-                                        onTapped: {
-                                            _app.removeFunctionCommand(4);
-                                        }
-                                    }
-                                ]
-                            }
-                            FunctionCommand {
-                                objectName: "functionAction6"
-                                gestureHandlers: [
-                                    TapHandler {
-                                        onTapped: {
-                                            _app.removeFunctionCommand(5);
-                                        }
-                                    }
-                                ]
-                            }
-                            FunctionCommand {
-                                objectName: "functionAction7"
-                                gestureHandlers: [
-                                    TapHandler {
-                                        onTapped: {
-                                            _app.removeFunctionCommand(6);
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                }
+		    onSelectNext: {
+          		_app.selectNextFunction();
             }
-        }
-        
+		    onRemoveAction: {
+          		_app.removeFunctionCommand(index);
+            }
+		}
+
         Tutorial1 {
             id: tutorial1Container
             objectName: "tutorial1Container"
@@ -566,7 +462,7 @@ Page {
             onStart: {
                 console.log("Started");
                 _app.tutorial = 0;
-                startButton.clicked();
+                compilePhaseContainer.start();
             }        
             onShowRun: {
                 compilePhaseContainer.visible = false;
@@ -603,7 +499,7 @@ Page {
         Container {
             id: creditsContainer
             objectName: "creditsContainer"
-            visible: true
+            visible: false
             preferredWidth: dimensions.screenWidth
             preferredHeight: dimensions.screenHeight
             background: Color.Black

@@ -4,10 +4,11 @@ Container {
     property variant dimensions: Dimensions {
     }
     property alias imageSource: view.imageSource
+    property bool showing: true
     verticalAlignment: VerticalAlignment.Center
     preferredWidth: dimensions.cmdWidth
     preferredHeight: dimensions.cmdHeight
-    background: normal.imagePaint
+    background: showing?normal.imagePaint:Color.Black
     rightMargin: dimensions.queueItemPadding
 
     ImageView {

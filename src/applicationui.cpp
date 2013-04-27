@@ -215,41 +215,52 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 	int endY = levelData["endY"].toInt();
 	QVariantList mapData = levelData["data"].toList();
 	int moves = levelData["totalMoves"].toInt();
+	qDebug("Setting tutorial = %d\n", levelData["tutorial"].toInt());
 	setTutorial(levelData["tutorial"].toInt()); // will return 0 if no tutorial field
 
-	int functionCount = 3;
-	if (levelData.contains("numFunctions"))
-		functionCount = levelData["numFunctions"].toInt();
-	if (functionCount < 0) functionCount = 0;
-	if (functionCount > 3) functionCount = 3; // FIXME: Hide function buttons if not allowed.
-
-	QVariantList functionLimits = levelData["functionLimit"].toList();
-	for (int i=0; i<functionCount; i++) {
-		Function *f;
-		if (i < functionLimits.count())
-			f = new Function(functionLimits[i].toInt());
-		else
-			f = new Function();
-		m_functions.append(f);
-		qDebug("Function %d limited to %d\n", i, f->count());
-	}
-	setFunctionCount(functionCount);
-	qDebug("Function count: %d\n", functionCount);
-
+	// Sanity check for reasonable map data
 	if (width < 0 || width > MAX_WIDTH || height < 0 || height > MAX_HEIGHT || width * height != mapData.count()) {
 		qDebug("Bad level data: %dx%d with %d elements\n", width, height, mapData.count());
 		return;
 	}
 
+	int functionCount = 4; // By default we have a main method and three functions
+	if (levelData.contains("numFunctions"))
+		functionCount = levelData["numFunctions"].toInt() + 1; // but we can reduce the number in the level file.
+	if (functionCount < 0) functionCount = 1; // We must have at least one function
+	if (functionCount > 3) functionCount = 4; // since that's the main method.
+
+	// Add main method
+	Function *f = new Function(moves); // FIXME: Level 8 has too many moves!
+	m_functions.append(f);
+
+	// Limit optional functions - Only the optional functions can be limited. TODO?
+	QVariantList functionLimits = levelData["functionLimit"].toList();
+	for (int i=1; i<functionCount; i++) {
+		if (i <= functionLimits.count())
+			f = new Function(functionLimits[i-1].toInt());
+		else
+			f = new Function();
+		m_functions.append(f);
+		qDebug("Function %d limited to %d\n", i, f->count());
+	}
+
+	// Update the Q_PROPERTY so that the QML can update the visible buttons
+	setFunctionCount(functionCount);
+	qDebug("Function count: %d\n", functionCount);
+
+	// Fill in map data
 	int *data = new int[width*height];
 	for (int i=0; i<width*height; i++) {
 		data[i] = mapData[i].toInt();
 	}
 
+	// Create map and robot
 	m_map = new Map(height, width, endX, endY, data, m_mapArea, this);
 	Label *movesLabel = m_gamePage->findChild<Label*>("movesLeft");
 	m_robot = new Robot(m_map, moves, movesLabel, startX, startY, endX, endY, Robot::getDirection(direction), this);
 
+	// Set up planning phase function editor
 	m_functionHeader = static_cast<Container *>(m_gamePage->findChild<Container*>("functionHeader"));
 	m_functionActions.clear();
 	m_functionActions.append(static_cast<Container *>(m_gamePage->findChild<Container*>("functionAction1")));
@@ -262,6 +273,7 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 	qDebug("Function header: %p\n", m_functionHeader);
 	qDebug("Function actions size: %d\n", m_functionActions.count());
 
+	// Connect robot moves for runtime phase to handle when the robot has finished.
 	QObject::connect(m_robot, SIGNAL(moved(int,int)), this, SLOT(robotMoved(int,int)));
 }
 
@@ -306,7 +318,7 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 	m_phase = COMPILE;
 	m_selectedFunction = 0;
 	setShouldShowFunctions(false);
-	setIsInFunction(-1);
+	setIsInFunction(0);
 	Container *compileContainer = m_gamePage->findChild<Container*>("compilePhaseContainer");
 	compileContainer->setVisible(true);
 
@@ -396,7 +408,7 @@ void ApplicationUI::addQueuedCommand(CommandType type)
 		// TODO: return failure to show user queue full?
 	} else if (m_phase == COMPILE) {
 		qDebug("Add command to function %d\n", m_selectedFunction);
-		if (m_selectedFunction >= 0 && m_selectedFunction < m_functions.count()) {
+		if (m_selectedFunction >= 0 && m_selectedFunction <= m_functions.count()) {
 			m_functions[m_selectedFunction]->append(type);
 			drawSelectedFunction();
 		}
@@ -405,19 +417,18 @@ void ApplicationUI::addQueuedCommand(CommandType type)
 
 void ApplicationUI::drawSelectedFunction()
 {
-	if (m_functionCount == 0) {
-		return;
-	}
-
 	qDebug("Drawing selected function %d\n", m_selectedFunction);
 	switch (m_selectedFunction) {
 	case 0:
-		m_functionHeader->setProperty("imageSource", "asset:///images/f1.png");
+		m_functionHeader->setProperty("imageSource", "asset:///images/main.png");
 		break;
 	case 1:
-		m_functionHeader->setProperty("imageSource", "asset:///images/f2.png");
+		m_functionHeader->setProperty("imageSource", "asset:///images/f1.png");
 		break;
 	case 2:
+		m_functionHeader->setProperty("imageSource", "asset:///images/f2.png");
+		break;
+	case 3:
 		m_functionHeader->setProperty("imageSource", "asset:///images/f3.png");
 		break;
 	}
@@ -428,11 +439,11 @@ void ApplicationUI::drawSelectedFunction()
 	for (; i<f->count(); i++) {
 		qDebug("Setting source for action[%d] from source[%d] (%d)\n", i+1, i, (*f)[i]);
 		m_functionActions[i]->setProperty("imageSource", getImageForCommand((*f)[i]));
-		m_functionActions[i]->setVisible(true);
+		m_functionActions[i]->setProperty("showing", true);
 	}
 	for (; i<m_functionActions.count(); i++) {
 		qDebug("Hiding action[%d]\n", i+1);
-		m_functionActions[i]->setVisible(false);
+		m_functionActions[i]->setProperty("showing", false);
 	}
 }
 
@@ -550,7 +561,7 @@ void ApplicationUI::timerFired()
 	}
 
 	if (m_stack.empty()) {
-		setIsInFunction(-1);
+		setIsInFunction(0);
 		if (m_highlightedContainer) {
 			m_highlightedContainer->setProperty("highlighted", false);
 		}
@@ -568,17 +579,17 @@ void ApplicationUI::timerFired()
 		m_robot->turnRight();
 		break;
 	case CMD_F1:
-		frame = new FunctionRunner(0, m_functions[0]);
-		countsAsMove = true;
-		shouldRemove = false;
-		break;
-	case CMD_F2:
 		frame = new FunctionRunner(1, m_functions[1]);
 		countsAsMove = true;
 		shouldRemove = false;
 		break;
-	case CMD_F3:
+	case CMD_F2:
 		frame = new FunctionRunner(2, m_functions[2]);
+		countsAsMove = true;
+		shouldRemove = false;
+		break;
+	case CMD_F3:
+		frame = new FunctionRunner(3, m_functions[3]);
 		countsAsMove = true;
 		shouldRemove = false;
 		break;
