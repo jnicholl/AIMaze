@@ -462,7 +462,7 @@ Page {
             onStart: {
                 console.log("Started");
                 _app.tutorial = 0;
-                compilePhaseContainer.start();
+                //compilePhaseContainer.start(); // FIXME: Tutorial needs changes
             }        
             onShowRun: {
                 compilePhaseContainer.visible = false;

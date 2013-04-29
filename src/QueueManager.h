@@ -30,6 +30,10 @@ public:
 	Q_INVOKABLE void remove(int index, bool force = false);
 	void add(ApplicationUI::CommandType type);
 	ApplicationUI::CommandType peek() const;
+	bool empty() const { return m_queueCount == 0; }
+
+signals:
+	void spaceAvailable(int);
 
 private:
 	const ApplicationUI *m_app;

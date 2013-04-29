@@ -1,0 +1,7 @@
+{
+"start":"level1-clap.ogg",
+"win":"level1-win.ogg",
+"lose":"level1-lose.ogg",
+"trackname":"level1-%1.ogg",
+"tracks":2
+}

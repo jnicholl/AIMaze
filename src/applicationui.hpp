@@ -30,6 +30,7 @@ class Robot;
 class Function;
 class FunctionRunner;
 class QueueManager;
+class RunPhase;
 
 #define QUEUE_LIMIT 5
 
@@ -96,6 +97,8 @@ public:
     Q_SLOT void selectNextFunction();
 
     Q_SLOT void timerFired();
+    Q_SLOT void onFinished();
+    Q_SLOT void onRestartAnimation();
 
     Q_SLOT void robotMoved(int x, int y);
 
@@ -254,6 +257,7 @@ private:
     bb::cascades::Container *m_highlightedContainer;
 
     TutorialManager m_tutorialManager;
+    RunPhase *m_runPhase;
 };
 
 #endif /* ApplicationUI_HPP_ */

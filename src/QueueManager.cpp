@@ -80,6 +80,7 @@ void QueueManager::remove(int index, bool force)
 
 	setValue(QUEUE_LIMIT-1, ApplicationUI::CMD_EMPTY);
 	m_queueCount--;
+	emit spaceAvailable(QUEUE_LIMIT-m_queueCount);
 }
 
 ApplicationUI::CommandType QueueManager::peek() const

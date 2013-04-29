@@ -53,17 +53,17 @@ Container {
         }
     }
 
-    Button {
-        text: "Start"
-        onClicked: {            
-            tutorial.start();
-        }
-        visible: state == 3
-        layoutProperties: AbsoluteLayoutProperties {
-            positionX: 213
-            positionY: 195
-        }
-    }
+//    Button {
+//        text: "Start"
+//        onClicked: {            
+//            tutorial.start();
+//        }
+//        visible: state == 3
+//        layoutProperties: AbsoluteLayoutProperties {
+//            positionX: 213
+//            positionY: 195
+//        }
+//    }
 
 	
     Label {

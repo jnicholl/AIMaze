@@ -21,6 +21,7 @@
 #include "robot.h"
 #include "function.h"
 #include "QueueManager.h"
+#include "RunPhase.h"
 #include <bb/cascades/ScreenIdleMode>
 
 using namespace bb::cascades;
@@ -50,6 +51,7 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 , m_isInF2(false)
 , m_isInF3(false)
 , m_highlightedContainer(0)
+, m_runPhase(new RunPhase(this))
 {
 	// Connect application signals so we show the menu to pause
 	QObject::connect(Application::instance(), SIGNAL(swipeDown()), this, SLOT(showMenu()));
@@ -77,9 +79,13 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
     app->setScene(m_navigationPane);
 
     // Connect up timers.
-    QObject::connect(&m_timer, SIGNAL(timeout()), this, SLOT(timerFired()));
-    m_finishTimer.setSingleShot(true);
-    QObject::connect(&m_finishTimer, SIGNAL(timeout()), this, SLOT(unpause()));
+//    QObject::connect(&m_timer, SIGNAL(timeout()), this, SLOT(timerFired()));
+//    m_finishTimer.setSingleShot(true);
+//    QObject::connect(&m_finishTimer, SIGNAL(timeout()), this, SLOT(unpause()));
+
+    // Connect run-phase signals
+    QObject::connect(m_runPhase, SIGNAL(finished()), this, SLOT(onFinished()));
+    QObject::connect(m_runPhase, SIGNAL(restartAnimation()), this, SLOT(onRestartAnimation()));
 }
 
 // Takes us back to the level selection screen.
@@ -105,12 +111,16 @@ void ApplicationUI::showMenu()
 void ApplicationUI::pause()
 {
 	if (m_phase == RUN) {
-		if (m_finishTimer.isActive()) {
-			m_finishTimer.stop();
-		}
-		m_timer.stop();
-		if (m_progressAnimation)
-			m_progressAnimation->stop();
+		if (m_runPhase)
+			m_runPhase->pause();
+		else
+			qDebug("BAD: ApplicationUI::pause called in run state with no runphase object!");
+//		if (m_finishTimer.isActive()) {
+//			m_finishTimer.stop();
+//		}
+//		m_timer.stop();
+//		if (m_progressAnimation)
+//			m_progressAnimation->stop();
 	}
 }
 
@@ -119,9 +129,13 @@ void ApplicationUI::pause()
 void ApplicationUI::unpause()
 {
 	if (m_phase == RUN) {
-		m_timer.start();
-		if (m_progressAnimation && m_robot && !m_robot->finished())
-			m_progressAnimation->play();
+		if (m_runPhase)
+			m_runPhase->resume();
+		else
+			qDebug("BAD: ApplicationUI::unpause called in run state with no runphase object!");
+//		m_timer.start();
+//		if (m_progressAnimation && m_robot && !m_robot->finished())
+//			m_progressAnimation->play();
 	}
 }
 
@@ -133,7 +147,7 @@ void ApplicationUI::unpause()
 void ApplicationUI::compilePhaseDone()
 {
 	Container *container = 0;
-	for (int i=0; i<3; i++) {
+	for (int i=1; i<=3; i++) { // FIXME: Hard-coded 3 function limit
 		for (int j=0; j<DEFAULT_FUNCTION_SIZE; j++) {
 			container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(i).arg(j+1));
 			if (container)
@@ -142,7 +156,9 @@ void ApplicationUI::compilePhaseDone()
 				qDebug() << "No container at " << QString("func%1_act%2").arg(i).arg(j+1);
 		}
 	}
-	for (int i=0; i<m_functionCount; i++) {
+
+	// Only populate containers for functions, not the main function
+	for (int i=1; i<m_functionCount; i++) {
 		Function *f = m_functions[i];
 		for (int j=0; j<f->commandCount(); j++) {
 			container = m_gamePage->findChild<Container*>(QString("func%1_act%2").arg(i).arg(j + 1 + (DEFAULT_FUNCTION_SIZE - f->commandCount())));
@@ -156,8 +172,9 @@ void ApplicationUI::compilePhaseDone()
 
 	m_phase = RUN;
 	Application::instance()->mainWindow()->setScreenIdleMode(ScreenIdleMode::KeepAwake);
+	m_runPhase->init(m_robot, m_queueManager, m_functions);
 
-	m_finishTimer.start(3000);
+//	m_finishTimer.start(3000);
 }
 
 
@@ -333,7 +350,7 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 
 	m_navigationPane->push(m_gamePage);
 
-	m_timer.setInterval(2000);
+//	m_timer.setInterval(2000);
 
 	m_gamePage->findChild<Container*>("compileFunctionContainer")->setVisible(m_functionCount > 0);
 	drawSelectedFunction();
@@ -369,13 +386,6 @@ QString ApplicationUI::getImageForCommand(CommandType type)
 	}
 	return text;
 }
-
-//void ApplicationUI::setQueueValue(int i, CommandType type)
-//{
-//	qDebug() << "Set " << i << " from " << m_queueCommands[i] << " to " << type;
-//	m_queueCommands[i] = type;
-//	m_queue[i]->setProperty("imageSource", getImageForCommand(type));
-//}
 
 void ApplicationUI::addQueuedCommand(CommandType type)
 {
@@ -508,94 +518,109 @@ void ApplicationUI::highlightFunction(int function, int pc)
 
 void ApplicationUI::timerFired()
 {
-	FunctionRunner *frame = 0;
-	bool shouldRemove = true;
-	bool countsAsMove = true;
-	CommandType cmd = m_queueManager->peek();
+//	m_runPhase->timerFired(m_robot);
+//	FunctionRunner *frame = 0;
+//	bool shouldRemove = true;
+//	bool countsAsMove = true;
+//	CommandType cmd = m_queueManager->peek();
+//
+//	if (!m_stack.empty()) {
+//		frame = m_stack.top();
+//		while (frame->finished()) {
+//			frame = m_stack.pop();
+//			delete frame;
+//			if (m_stack.empty()) {
+//				// Finished all function calls, remove the function on the queue
+//				m_queueManager->remove(0, true);
+//				cmd = m_queueManager->peek();
+//				break;
+//			}
+//			frame = m_stack.top();
+//		}
+//
+//		if (!m_stack.empty()) {
+//			setIsInFunction(frame->function());
+//			highlightFunction(frame->function(), frame->pc());
+//			cmd = frame->step();
+//			countsAsMove = false;
+//			shouldRemove = false;
+//		}
+//
+//		frame = 0; // We re-use this later if the command was a function call.
+//	}
+//
+//	if (m_stack.empty()) {
+//		setIsInFunction(0);
+//		if (m_highlightedContainer) {
+//			m_highlightedContainer->setProperty("highlighted", false);
+//		}
+//	}
+//
+//	qDebug() << "Cmd: " << cmd;
+//	switch (cmd) {
+//	case CMD_FORWARD:
+//		m_robot->moveForward();
+//		break;
+//	case CMD_LEFT:
+//		m_robot->turnLeft();
+//		break;
+//	case CMD_RIGHT:
+//		m_robot->turnRight();
+//		break;
+//	case CMD_F1:
+//		frame = new FunctionRunner(1, m_functions[1]);
+//		countsAsMove = true;
+//		shouldRemove = false;
+//		break;
+//	case CMD_F2:
+//		frame = new FunctionRunner(2, m_functions[2]);
+//		countsAsMove = true;
+//		shouldRemove = false;
+//		break;
+//	case CMD_F3:
+//		frame = new FunctionRunner(3, m_functions[3]);
+//		countsAsMove = true;
+//		shouldRemove = false;
+//		break;
+//	default:
+//		break;
+//	}
+//
+//	if (frame) {
+//		m_stack.push(frame);
+//	}
+//
+//	if (shouldRemove)
+//		m_queueManager->remove(0, true);
+//
+//	if (countsAsMove) {
+//		m_robot->decrementMoves();
+//		if (m_robot->hasNoPower(!m_stack.empty())) {
+//			m_robot->setImageForPower(false);
+//			QTimer::singleShot(500, this, SLOT(processFinish()));
+//			//processFinish(m_robot->finished());
+//			return;
+//		}
+//	}
+//	if (m_runPhase->hasNoMoreActions()) {
+//		QTimer::singleShot(500, this, SLOT(processFinish()));
+//		return;
+//	}
+//
+//	if (!m_robot->finished())
+//		m_progressAnimation->play();
+//	else
+//		QTimer::singleShot(500, this, SLOT(processFinish()));
+}
 
-	if (!m_stack.empty()) {
-		frame = m_stack.top();
-		while (frame->finished()) {
-			frame = m_stack.pop();
-			delete frame;
-			if (m_stack.empty()) {
-				// Finished all function calls, remove the function on the queue
-				m_queueManager->remove(0, true);
-				cmd = m_queueManager->peek();
-				break;
-			}
-			frame = m_stack.top();
-		}
+void ApplicationUI::onFinished()
+{
+	QTimer::singleShot(500, this, SLOT(processFinish()));
+}
 
-		if (!m_stack.empty()) {
-			setIsInFunction(frame->function());
-			highlightFunction(frame->function(), frame->pc());
-			cmd = frame->step();
-			countsAsMove = false;
-			shouldRemove = false;
-		}
-
-		frame = 0; // We re-use this later if the command was a function call.
-	}
-
-	if (m_stack.empty()) {
-		setIsInFunction(0);
-		if (m_highlightedContainer) {
-			m_highlightedContainer->setProperty("highlighted", false);
-		}
-	}
-
-	qDebug() << "Cmd: " << cmd;
-	switch (cmd) {
-	case CMD_FORWARD:
-		m_robot->moveForward();
-		break;
-	case CMD_LEFT:
-		m_robot->turnLeft();
-		break;
-	case CMD_RIGHT:
-		m_robot->turnRight();
-		break;
-	case CMD_F1:
-		frame = new FunctionRunner(1, m_functions[1]);
-		countsAsMove = true;
-		shouldRemove = false;
-		break;
-	case CMD_F2:
-		frame = new FunctionRunner(2, m_functions[2]);
-		countsAsMove = true;
-		shouldRemove = false;
-		break;
-	case CMD_F3:
-		frame = new FunctionRunner(3, m_functions[3]);
-		countsAsMove = true;
-		shouldRemove = false;
-		break;
-	default:
-		break;
-	}
-
-	if (frame) {
-		m_stack.push(frame);
-	}
-
-	if (shouldRemove)
-		m_queueManager->remove(0, true);
-
-	if (countsAsMove) {
-		m_robot->decrementMoves();
-		if (m_robot->hasNoPower(!m_stack.empty())) {
-			m_robot->setImageForPower(false);
-			QTimer::singleShot(500, this, SLOT(processFinish()));
-			//processFinish(m_robot->finished());
-			return;
-		}
-	}
-
-	if (!m_robot->finished())
-		m_progressAnimation->play();
-	else
-		QTimer::singleShot(500, this, SLOT(processFinish()));
+void ApplicationUI::onRestartAnimation()
+{
+	m_progressAnimation->play();
 }
 
 void ApplicationUI::clickMenuButton()
@@ -641,10 +666,10 @@ void ApplicationUI::robotMoved(int x, int y)
 {
 	Q_UNUSED(x);
 	Q_UNUSED(y);
-	if (m_robot->finished()) {
-		qDebug() << "Finished";
-		m_timer.stop();
-	}
+//	if (m_robot->finished()) {
+//		qDebug() << "Finished";
+//		m_timer.stop();
+//	}
 }
 
 void ApplicationUI::nextLevel()
