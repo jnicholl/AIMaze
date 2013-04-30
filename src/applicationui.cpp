@@ -22,6 +22,7 @@
 #include "function.h"
 #include "QueueManager.h"
 #include "RunPhase.h"
+#include "MusicPlayer.h"
 #include <bb/cascades/ScreenIdleMode>
 
 using namespace bb::cascades;
@@ -86,12 +87,20 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
     // Connect run-phase signals
     QObject::connect(m_runPhase, SIGNAL(finished()), this, SLOT(onFinished()));
     QObject::connect(m_runPhase, SIGNAL(restartAnimation()), this, SLOT(onRestartAnimation()));
+
+    m_mediaPlayer = new MusicPlayer(this);
+    m_mediaPlayer->setSourceUrl(QUrl("app/native/assets/sounds/title.ogg"));
+    m_mediaPlayer->play();
+
+	QObject::connect(Application::instance(), SIGNAL(invisible()), m_mediaPlayer, SLOT(stop()));
+    QObject::connect(Application::instance(), SIGNAL(awake()), m_mediaPlayer, SLOT(play()));
 }
 
 // Takes us back to the level selection screen.
 // Generally should only be called from the menu.
 void ApplicationUI::back()
 {
+	m_mediaPlayer->play();
 	m_phase = MENU;
 	m_navigationPane->pop();
 }
@@ -172,6 +181,7 @@ void ApplicationUI::compilePhaseDone()
 
 	m_phase = RUN;
 	Application::instance()->mainWindow()->setScreenIdleMode(ScreenIdleMode::KeepAwake);
+	m_mediaPlayer->stop();
 	m_runPhase->init(m_robot, m_queueManager, m_functions);
 
 //	m_finishTimer.start(3000);
@@ -675,6 +685,7 @@ void ApplicationUI::robotMoved(int x, int y)
 void ApplicationUI::nextLevel()
 {
 	int levelCount = m_levelList->dataModel()->childCount(QVariantList());
+	m_mediaPlayer->play();
 	if (m_levelIndex >= levelCount-1) {
 		back();
 	} else {
@@ -687,6 +698,7 @@ void ApplicationUI::nextLevel()
 void ApplicationUI::retry()
 {
 	QVariantList indexPath;
+	m_mediaPlayer->play();
 	indexPath.append(m_levelIndex);
 	startLevel(indexPath);
 }

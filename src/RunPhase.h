@@ -19,16 +19,26 @@ class Function;
 class Robot;
 
 struct CommandAction {
-	CommandAction(ApplicationUI::CommandType a, int f)
+	CommandAction(ApplicationUI::CommandType a, int f, int s)
 		: action(a)
-		, function(f) {}
+		, function(f)
+		, stackDepth(s)
+	{}
 	ApplicationUI::CommandType action;
 	int function;
+	int stackDepth;
 };
 
 class RunPhase : public QObject {
 	Q_OBJECT
 public:
+	enum State {
+		STOPPED = 0,
+		PRELOAD = 1,
+		CLAP = 2,
+		RUN = 3
+	};
+
 	RunPhase(QObject *parent=0);
 	void init(Robot *robot, QueueManager *queueMgr, QList<Function*> functions);
 
@@ -36,6 +46,7 @@ public:
 	Q_SLOT void timerFired();
 
 	Q_SLOT void onLevelStart();
+	Q_SLOT void onLevelPreStart();
 
 	bool hasNoMoreActions();
 
@@ -55,7 +66,10 @@ private:
 	Robot *m_robot;
 
 	QTimer m_levelStartTimer;
+	QTimer m_clapTimer;
 	QTimer m_timer;
+
+	State m_state;
 };
 
 #endif /* RUNPHASE_H_ */

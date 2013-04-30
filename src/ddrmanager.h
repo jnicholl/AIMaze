@@ -26,12 +26,11 @@ public:
 	virtual ~DDRManager();
 
 	bool loadLevelSounds();
-	Q_SLOT void start();
-	Q_SLOT void onTimer();
 
 	Q_SLOT void setRepeat(bool repeat) { m_repeatTrack = repeat; }
 	Q_SLOT void setWin(bool win) { m_win = win; }
 
+	void playClapTrack();
 	void playEndTrack(bool won);
 	void playTrack();
 

@@ -29,6 +29,7 @@ class Map;
 class Robot;
 class Function;
 class FunctionRunner;
+class MusicPlayer;
 class QueueManager;
 class RunPhase;
 
@@ -258,6 +259,7 @@ private:
 
     TutorialManager m_tutorialManager;
     RunPhase *m_runPhase;
+    MusicPlayer *m_mediaPlayer;
 };
 
 #endif /* ApplicationUI_HPP_ */

@@ -18,13 +18,18 @@ RunPhase::RunPhase(QObject *parent)
 	: QObject(parent)
 	, m_queueManager(0)
 	, m_actionIndex(0)
+	, m_state(STOPPED)
 {
 	SoundManager *soundManager = new SoundManager(this); // TODO: Should this be passed in?
 	m_ddrManager = new DDRManager(soundManager, this);
 
 	// Set up level start timer
 	m_levelStartTimer.setSingleShot(true);
-	QObject::connect(&m_levelStartTimer, SIGNAL(timeout()), this, SLOT(onLevelStart()));
+	QObject::connect(&m_levelStartTimer, SIGNAL(timeout()), this, SLOT(onLevelPreStart()));
+
+	// Set up clap timer
+	m_clapTimer.setSingleShot(true);
+	QObject::connect(&m_clapTimer, SIGNAL(timeout()), this, SLOT(onLevelStart()));
 
 	// Set up main level gameplay timer
 	m_timer.setInterval(2000);
@@ -40,6 +45,7 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 	m_functions = functions;
 	m_actions.clear();
 	m_actionIndex = 0;
+	m_state = STOPPED;
 
 	m_ddrManager->loadLevelSounds();
 
@@ -62,7 +68,15 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 		}
 		if (!stack.empty()) {
 			ApplicationUI::CommandType cmd = frame->step();
-			m_actions.append(CommandAction(cmd, frame->function()));
+			switch (cmd) {
+			case ApplicationUI::CMD_FORWARD:
+			case ApplicationUI::CMD_LEFT:
+			case ApplicationUI::CMD_RIGHT:
+				m_actions.append(CommandAction(cmd, frame->function(), stack.count()));
+				break;
+			default:
+				break;
+			}
 
 			if (stack.size() == 1) {
 				// Moves count in the main method
@@ -122,7 +136,8 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 		}
 	}
 
-	m_levelStartTimer.start(3000);
+	m_state = PRELOAD;
+	m_levelStartTimer.start(2500);
 }
 
 void RunPhase::fillQueue(int count)
@@ -140,12 +155,32 @@ void RunPhase::fillQueue(int count)
 void RunPhase::pause()
 {
 	m_levelStartTimer.stop();
+	m_clapTimer.stop();
 	m_timer.stop();
 }
 
 void RunPhase::resume()
 {
-	m_timer.start(); // FIXME: Properly handle resuming level start or fractional timer
+	switch (m_state) {
+	case PRELOAD:
+		m_levelStartTimer.start(2500);
+		break;
+	case CLAP:
+		onLevelPreStart();
+		break;
+	case RUN:
+		onLevelStart(); // FIXME: Properly handle resuming level start or fractional timer
+		break;
+	case STOPPED:
+	default:
+		break;
+	}
+}
+
+void RunPhase::onLevelPreStart()
+{
+	m_clapTimer.start(500);
+	m_ddrManager->playClapTrack();
 }
 
 void RunPhase::onLevelStart()

@@ -63,45 +63,50 @@ load_fail:
 	return false;
 }
 
-void DDRManager::start()
-{
-	if (m_tracks.empty())
-		return;
+//void DDRManager::start()
+//{
+//	if (m_tracks.empty())
+//		return;
+//
+//	m_repeatTrack = false;
+//	m_win = false;
+//	m_state = START;
+//	m_soundMgr->play(m_tracks[0]);
+//}
+//
+//void DDRManager::onTimer()
+//{
+//	if (m_state == WIN || m_state == LOSE) {
+//		qCritical("Timer should not be firing in WIN or LOSE state!");
+//	}
+//
+//	if (!m_repeatTrack || m_state == START) { // Never repeat the start track
+//		if (m_state + 1 <= m_trackCount) // 0-based index
+//			m_state++;
+//		else {
+//			if (m_win)
+//				m_state = WIN;
+//			else
+//				m_state = LOSE;
+//		}
+//	}
+//
+//	switch (m_state) {
+//	case WIN:
+//		m_soundMgr->play(m_winTrack);
+//		break;
+//	case LOSE:
+//		m_soundMgr->play(m_loseTrack);
+//		break;
+//	default:
+//		m_soundMgr->play(m_tracks[m_state]);
+//		break;
+//	}
+//}
 
-	m_repeatTrack = false;
-	m_win = false;
-	m_state = START;
+void DDRManager::playClapTrack()
+{
 	m_soundMgr->play(m_tracks[0]);
-}
-
-void DDRManager::onTimer()
-{
-	if (m_state == WIN || m_state == LOSE) {
-		qCritical("Timer should not be firing in WIN or LOSE state!");
-	}
-
-	if (!m_repeatTrack || m_state == START) { // Never repeat the start track
-		if (m_state + 1 <= m_trackCount) // 0-based index
-			m_state++;
-		else {
-			if (m_win)
-				m_state = WIN;
-			else
-				m_state = LOSE;
-		}
-	}
-
-	switch (m_state) {
-	case WIN:
-		m_soundMgr->play(m_winTrack);
-		break;
-	case LOSE:
-		m_soundMgr->play(m_loseTrack);
-		break;
-	default:
-		m_soundMgr->play(m_tracks[m_state]);
-		break;
-	}
 }
 
 void DDRManager::playEndTrack(bool won)
@@ -114,7 +119,7 @@ void DDRManager::playEndTrack(bool won)
 
 void DDRManager::playTrack() // FIXME: Use state?
 {
-	static int index = 0;
-	index = (index+1)%2+1;
-	m_soundMgr->play(m_tracks[index]);
+	static int index = 1;
+	index = (index+1)%2;
+	m_soundMgr->play(m_tracks[index+1]);
 }
