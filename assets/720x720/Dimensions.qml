@@ -33,5 +33,8 @@ Container {
 
     // Not used
     property int backButtonHeight: 62
+
+    // Used for start X position of queue
+    property int firstQueueItemX: 35
 }
 

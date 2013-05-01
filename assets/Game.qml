@@ -271,12 +271,25 @@ Page {
                     positionX: 0
                     positionY: 0
                 }
-                layout: StackLayout {
-                    orientation: LayoutOrientation.LeftToRight
-                }
+                layout: AbsoluteLayout {}
                 preferredHeight: dimensions.queueHeight
                 preferredWidth: dimensions.playAreaWidth
-                leftPadding: dimensions.sidebarPadding * 4/3
+//                property real dx: dimensions.playAreaWidth - dimensions.firstQueueItemX - 299
+//                QueueCommand {
+//                    imageSource: "asset:///images/forward.png"
+//                    index: 0
+//                    translationX: queueContainer.dx
+//                }
+//                QueueCommand {
+//                    imageSource: "asset:///images/forward.png"
+//                    index: 1
+//                    translationX: queueContainer.dx
+//                }
+//                QueueCommand {
+//                    imageSource: "asset:///images/forward.png"
+//                    index: 2
+//                    translationX: queueContainer.dx
+//                }
             }
         }
         
@@ -439,6 +452,7 @@ Page {
 
 		CompilePhase {
 		    id: compilePhaseContainer
+		    visible: false
 		    objectName: "compilePhaseContainer"
 		    preferredWidth: dimensions.playAreaWidth
 		    preferredHeight: dimensions.screenHeight

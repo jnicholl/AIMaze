@@ -402,7 +402,7 @@ void ApplicationUI::addQueuedCommand(CommandType type)
 	if (type == CMD_EMPTY) return;
 
 	if (m_phase == RUN) {
-		m_queueManager->add(type);
+		m_runPhase->onCommand(type);
 	} else if (m_phase == COMPILE) {
 		qDebug("Add command to function %d\n", m_selectedFunction);
 		if (m_selectedFunction >= 0 && m_selectedFunction <= m_functions.count()) {

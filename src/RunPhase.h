@@ -13,6 +13,8 @@
 
 #include "applicationui.hpp"
 
+#include "ElapsedTimer.h"
+
 class DDRManager;
 class QueueManager;
 class Function;
@@ -53,6 +55,8 @@ public:
 	void pause();
 	void resume();
 
+	void onCommand(ApplicationUI::CommandType cmd);
+
 signals:
 	void restartAnimation();
 	void finished();
@@ -67,9 +71,10 @@ private:
 
 	QTimer m_levelStartTimer;
 	QTimer m_clapTimer;
-	QTimer m_timer;
+	ElapsedTimer m_timer;
 
 	State m_state;
+	int m_preloadCount;
 };
 
 #endif /* RUNPHASE_H_ */

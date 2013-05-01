@@ -34,6 +34,7 @@ Container {
     // Used for pausebutton on L-series
     property int backButtonHeight: 82
     
-    
+    // Used for start X position of queue
+    property int firstQueueItemX: 40
 }
 
