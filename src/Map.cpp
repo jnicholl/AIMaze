@@ -16,7 +16,8 @@
 
 using namespace bb::cascades;
 
-Map::Map(int rows, int cols, int endX, int endY, int *data, Container *mapArea, QObject *parent)
+Map::Map(int rows, int cols, int endX, int endY, int *data,
+		Container *mapArea, QObject *parent)
 	: QObject(parent)
 	, m_rows(rows)
 	, m_cols(cols)
@@ -55,6 +56,14 @@ Map::Map(int rows, int cols, int endX, int endY, int *data, Container *mapArea, 
 
 	QObject::connect(m_mapArea, SIGNAL(preferredHeightChanged(float)), this, SLOT(parentHeightChanged(float)));
 	mapArea->add(m_mapArea);
+
+	m_mapOverlay = Container::create()
+		.preferredSize(m_cellSize * m_cols, m_cellSize * m_rows)
+		.layout(new AbsoluteLayout());
+	m_mapOverlay->setHorizontalAlignment(HorizontalAlignment::Center);
+	m_mapOverlay->setVerticalAlignment(VerticalAlignment::Center);
+
+	mapArea->add(m_mapOverlay);
 }
 
 bool Map::positionAvailable(int x, int y)
@@ -104,4 +113,34 @@ void Map::parentHeightChanged(float parentHeight)
 		properties->setPositionX(properties->positionX() * m_cellSize / oldCellSize);
 		properties->setPositionY(properties->positionY() * m_cellSize / oldCellSize);
 	}
+}
+
+void Map::eraseOverlay()
+{
+	m_mapOverlay->removeAll();
+}
+
+void Map::drawOverlayConnection(int x1, int y1, int x2, int y2)
+{
+	if ((x1 != x2 && y1 != y2) || (std::abs(x1-x2) >= 2 || std::abs(y1-y2) >= 2)) {
+		qDebug("drawOverlayConnection: Bad data: (%d,%d),(%d,%d)\n", x1, y1, x2, y2);
+		return;
+	}
+
+	int x = 0, y = 0;
+	int w = 1, h = 1;
+	if (x1 == x2) {
+		x = x1 * m_cellSize + m_cellSize / 2;
+		y = std::min(y1, y2) * m_cellSize + m_cellSize / 2;
+		h = m_cellSize;
+	} else if (y1 == y2) {
+		x = std::min(x1, x2) * m_cellSize + m_cellSize / 2;
+		y = y1 * m_cellSize + m_cellSize / 2;
+		w = m_cellSize;
+	}
+	Container *c = Container::create()
+					.preferredSize(w,h)
+					.layoutProperties(AbsoluteLayoutProperties::create().position(x,y))
+					.background(Color::fromRGBA(0.0f, 0.7f, 0.7f, 1.0f));
+	m_mapOverlay->add(c);
 }

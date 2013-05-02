@@ -191,6 +191,8 @@ signals:
 	void tutorialChanged(int);
 
 private:
+	void computePath();
+
 	void loadSavedState();
 	void saveState();
 
@@ -211,16 +213,11 @@ private:
 
     // Base QML document for creating the objects inside the queue, used to
     // create objects each level.
-//    bb::cascades::QmlDocument *m_qmlQueueCommand;
-//    bb::cascades::Container *m_queueContainer;
     bb::cascades::Container *m_mapArea;
 
     bb::cascades::SequentialAnimation *m_progressAnimation;
 
     QueueManager *m_queueManager;
-//    int m_queueCount;
-//    CommandType m_queueCommands[QUEUE_LIMIT];
-//    QList<bb::cascades::Container*> m_queue;
 
     // Used for each action taken during the level
     QTimer m_timer;

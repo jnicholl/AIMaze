@@ -41,6 +41,8 @@ public:
 	int endX() const { return m_endX; }
 	int endY() const { return m_endY; }
 
+	Direction direction() const { return m_direction; }
+
 	int moves() const { return m_moves; }
 	bool hasNoPower(bool inFunction) const { return m_moves <= (inFunction?-1:0); }
 	void decrementMoves();

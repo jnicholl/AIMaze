@@ -408,6 +408,137 @@ void ApplicationUI::addQueuedCommand(CommandType type)
 		if (m_selectedFunction >= 0 && m_selectedFunction <= m_functions.count()) {
 			m_functions[m_selectedFunction]->append(type);
 			drawSelectedFunction();
+			computePath();
+		}
+	}
+}
+
+void ApplicationUI::computePath()
+{
+	m_map->eraseOverlay();
+	if (m_functions[0]->count() <= 0) {
+		return;
+	}
+
+	Robot::Direction dir = m_robot->direction();
+	int x = m_robot->x();
+	int y = m_robot->y();
+	QStack<FunctionRunner*> stack;
+	stack.push(new FunctionRunner(0, m_functions[0]));
+	FunctionRunner *frame = 0;
+	int moveLimit = m_functions[0]->count();
+	int moveCount = 0;
+	while (moveCount < moveLimit && !stack.empty()) {
+		frame = stack.top();
+		while (frame->finished()) {
+			moveCount++;
+//			qDebug("COMPUTE_PATH: moveCount = %d\n", moveCount);
+			frame = stack.pop();
+			delete frame;
+			if (stack.empty()) {
+				// Finished all function calls, we are done
+				break;
+			}
+			frame = stack.top();
+		}
+		if (!stack.empty()) {
+			ApplicationUI::CommandType cmd = frame->step();
+			switch (cmd) {
+			case ApplicationUI::CMD_FORWARD:
+				switch (dir) {
+				case Robot::UP:
+					if (m_map->positionAvailable(x,y-1)) {
+						m_map->drawOverlayConnection(x, y, x, y-1);
+						y = y-1;
+					}
+					break;
+				case Robot::DOWN:
+					if (m_map->positionAvailable(x,y+1)) {
+						m_map->drawOverlayConnection(x, y, x, y+1);
+						y = y+1;
+					}
+					break;
+				case Robot::LEFT:
+					if (m_map->positionAvailable(x-1,y)) {
+						m_map->drawOverlayConnection(x, y, x-1, y);
+						x = x-1;
+					}
+					break;
+				case Robot::RIGHT:
+					if (m_map->positionAvailable(x+1,y)) {
+						m_map->drawOverlayConnection(x, y, x+1, y);
+						x = x+1;
+					}
+					break;
+				}
+
+				break;
+			case ApplicationUI::CMD_LEFT:
+				switch (dir) {
+				case Robot::UP:
+					dir = Robot::LEFT;
+					break;
+				case Robot::LEFT:
+					dir = Robot::DOWN;
+					break;
+				case Robot::DOWN:
+					dir = Robot::RIGHT;
+					break;
+				case Robot::RIGHT:
+					dir = Robot::UP;
+					break;
+				}
+				break;
+			case ApplicationUI::CMD_RIGHT:
+				switch (dir) {
+				case Robot::UP:
+					dir = Robot::RIGHT;
+					break;
+				case Robot::LEFT:
+					dir = Robot::UP;
+					break;
+				case Robot::DOWN:
+					dir = Robot::LEFT;
+					break;
+				case Robot::RIGHT:
+					dir = Robot::DOWN;
+					break;
+				}
+				break;
+			default:
+				break;
+			}
+
+			int functionIndex = -1;
+			switch (cmd) {
+			case ApplicationUI::CMD_F1:
+				functionIndex = 1;
+				break;
+			case ApplicationUI::CMD_F2:
+				functionIndex = 2;
+				break;
+			case ApplicationUI::CMD_F3:
+				functionIndex = 3;
+				break;
+			default:
+				break;
+			}
+			if (functionIndex > 0) {
+				// We can only push functions on if we have space.
+				if (moveCount < moveLimit) {
+//					qDebug("COMPUTE_PATH: pushing function, moveCount = %d\n", moveCount);
+					stack.push(
+						new FunctionRunner(functionIndex,
+								m_functions[functionIndex]));
+				} else {
+					moveCount++; // otherwise terminate here.
+//					qDebug("COMPUTE_PATH: NOT pushing function, moveCount = %d\n", moveCount);
+				}
+			} else if (stack.size() == 1) {
+				// Moves count in the main method but we won't count function calls until they're done.
+				moveCount++;
+//				qDebug("COMPUTE_PATH: Moves count in the main, moveCount = %d\n", moveCount);
+			}
 		}
 	}
 }
@@ -509,6 +640,7 @@ void ApplicationUI::removeFunctionCommand(int index)
 	qDebug("Removing %d from functions[%d]\n", index, m_selectedFunction);
 	m_functions[m_selectedFunction]->remove(index);
 	drawSelectedFunction();
+	computePath();
 }
 
 void ApplicationUI::highlightFunction(int function, int pc)

@@ -25,10 +25,12 @@ struct CommandAction {
 		: action(a)
 		, function(f)
 		, stackDepth(s)
+		, hit(false)
 	{}
 	ApplicationUI::CommandType action;
 	int function;
 	int stackDepth;
+	bool hit;
 };
 
 class RunPhase : public QObject {
@@ -62,6 +64,8 @@ signals:
 	void finished();
 
 private:
+	Q_SLOT void moveRobot();
+
 	QueueManager *m_queueManager;
 	QList<Function*> m_functions;
 	QList<CommandAction> m_actions;
@@ -72,6 +76,7 @@ private:
 	QTimer m_levelStartTimer;
 	QTimer m_clapTimer;
 	ElapsedTimer m_timer;
+	QTimer m_robotTimer;
 
 	State m_state;
 	int m_preloadCount;

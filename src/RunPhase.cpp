@@ -13,6 +13,8 @@
 #include "function.h"
 #include "robot.h"
 
+#define TIMER_INTERVAL 500
+#define TIMER_THRESHOLD 50
 
 RunPhase::RunPhase(QObject *parent)
 	: QObject(parent)
@@ -32,8 +34,11 @@ RunPhase::RunPhase(QObject *parent)
 	QObject::connect(&m_clapTimer, SIGNAL(timeout()), this, SLOT(onLevelStart()));
 
 	// Set up main level gameplay timer
-	m_timer.setInterval(500);
+	m_timer.setInterval(TIMER_INTERVAL);
 	QObject::connect(&m_timer, SIGNAL(timeout()), this, SLOT(timerFired()));
+
+	m_robotTimer.setSingleShot(true);
+	QObject::connect(&m_robotTimer, SIGNAL(timeout()), this, SLOT(moveRobot()));
 }
 
 void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> functions) {
@@ -55,9 +60,10 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 	FunctionRunner *frame = 0;
 	int moveLimit = m_functions[0]->count();
 	int moveCount = 0;
-	while (moveCount <= moveLimit && !stack.empty()) {
+	while (moveCount < moveLimit && !stack.empty()) {
 		frame = stack.top();
 		while (frame->finished()) {
+			moveCount++;
 			frame = stack.pop();
 			delete frame;
 			if (stack.empty()) {
@@ -81,11 +87,6 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 				break;
 			}
 
-			if (stack.size() == 1) {
-				// Moves count in the main method
-				moveCount++;
-			}
-
 			int functionIndex = -1;
 			switch (cmd) {
 			case ApplicationUI::CMD_F1:
@@ -101,13 +102,16 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 				break;
 			}
 			if (functionIndex > 0) {
-				if (stack.size() > 1) {
-					// Function calls count everywhere
-					moveCount++;
-				}
-				stack.push(
+				if (moveCount < moveLimit) {
+					stack.push(
 						new FunctionRunner(functionIndex,
 								m_functions[functionIndex]));
+				} else {
+					moveCount++; // otherwise terminate here.
+				}
+			} else if (stack.size() == 1) {
+				// Moves count in the main method but we won't count function calls until they're done.
+				moveCount++;
 			}
 		}
 	}
@@ -147,7 +151,7 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 
 	m_state = PRELOAD;
 	m_preloadCount = 5;
-	m_levelStartTimer.start(500);
+	m_levelStartTimer.start(TIMER_INTERVAL);
 
 }
 
@@ -176,7 +180,7 @@ void RunPhase::resume()
 {
 	switch (m_state) {
 	case PRELOAD:
-		m_levelStartTimer.start(500);
+		m_levelStartTimer.start(TIMER_INTERVAL);
 
 		break;
 	case CLAP:
@@ -210,7 +214,7 @@ void RunPhase::onLevelPreStart()
 		m_ddrManager->playClapTrack();
 	default:
 		m_queueManager->animate();
-		m_levelStartTimer.start(500);
+		m_levelStartTimer.start(TIMER_INTERVAL);
 		break;
 	}
 	m_preloadCount--;
@@ -225,49 +229,19 @@ void RunPhase::onLevelStart()
 
 void RunPhase::timerFired()
 {
-//	if ((m_actionIndex % 4) == 3) { // FIXME: This is not right. We need to handle events that happen slightly after our timer.
-////		ApplicationUI::CommandType cmd = m_actions[m_actionIndex/4].action;
-////		switch (cmd) {
-////		case ApplicationUI::CMD_FORWARD:
-////			m_robot->moveForward();
-////			break;
-////		case ApplicationUI::CMD_LEFT:
-////			m_robot->turnLeft();
-////			break;
-////		case ApplicationUI::CMD_RIGHT:
-////			m_robot->turnRight();
-////			break;
-////		default:
-////			break;
-////		}
-//	}
-//
-//	if ((m_actionIndex % 4) == 0) {
-//		if (hasNoMoreActions() || m_robot->finished()) {
-//			m_timer.stop();
-//			m_ddrManager->playEndTrack(m_robot->finished());
-//			m_queueManager->animate(); // hide the queue actions
-//			emit finished();
-//			return;
-//		} else {
-//			m_ddrManager->playTrack();
-//			emit restartAnimation();
-//		}
-//	}
+	if ((m_actionIndex % 4) == 3) {
+		m_robotTimer.start(TIMER_THRESHOLD * 2);
+	}
 
-	if (hasNoMoreActions() || m_robot->finished()) {
-		m_timer.stop();
-		m_ddrManager->playEndTrack(m_robot->finished());
-		m_queueManager->animate(); // hide the queue actions
-		emit finished();
-		return;
-	} else if ((m_actionIndex % 4) == 0) {
+	if ((m_actionIndex % 4) == 0) {
 		m_ddrManager->playTrack();
 		emit restartAnimation();
 	}
 
-	m_actionIndex++;
-	m_queueManager->animate();
+	if (!hasNoMoreActions()) {
+		m_actionIndex++;
+		m_queueManager->animate();
+	}
 }
 
 bool RunPhase::hasNoMoreActions()
@@ -277,13 +251,39 @@ bool RunPhase::hasNoMoreActions()
 //	return m_queueManager->empty();
 }
 
+void RunPhase::moveRobot()
+{
+    // TODO: Calculate score here
+	ApplicationUI::CommandType cmd = m_actions[m_actionIndex - 1].action;
+	switch (cmd) {
+	case ApplicationUI::CMD_FORWARD:
+		m_robot->moveForward();
+		break;
+	case ApplicationUI::CMD_LEFT:
+		m_robot->turnLeft();
+		break;
+	case ApplicationUI::CMD_RIGHT:
+		m_robot->turnRight();
+		break;
+	default:
+		break;
+	}
+
+	if (hasNoMoreActions() || m_robot->finished()) {
+		m_timer.stop();
+		m_ddrManager->playEndTrack(m_robot->finished());
+		m_queueManager->animate(); // hide the queue actions
+		emit finished();
+	}
+}
+
 void RunPhase::onCommand(ApplicationUI::CommandType cmd)
 {
 	int msec = m_timer.remaining();
 	int currentIndex = m_actionIndex;
-	if (msec < 50) {
+	if (msec < TIMER_THRESHOLD) {
 		currentIndex -= 1;
-	} else if (msec > 450) {
+	} else if (msec > TIMER_INTERVAL - TIMER_THRESHOLD) {
 
 	} else {
 		// ignore, not close enough to anything
@@ -292,22 +292,23 @@ void RunPhase::onCommand(ApplicationUI::CommandType cmd)
 
 	if (cmd == m_actions[currentIndex].action) {
 		// We're okay
-		if ((currentIndex % 4) == 3) {
-			// FIXME: need to get cmd from actions somehow.
-			switch (cmd) {
-			case ApplicationUI::CMD_FORWARD:
-				m_robot->moveForward();
-				break;
-			case ApplicationUI::CMD_LEFT:
-				m_robot->turnLeft();
-				break;
-			case ApplicationUI::CMD_RIGHT:
-				m_robot->turnRight();
-				break;
-			default:
-				break;
-			}
-		}
+		m_actions[currentIndex].hit = true;
+//		if ((currentIndex % 4) == 3) {
+//			// FIXME: need to get cmd from actions somehow.
+//			switch (cmd) {
+//			case ApplicationUI::CMD_FORWARD:
+//				m_robot->moveForward();
+//				break;
+//			case ApplicationUI::CMD_LEFT:
+//				m_robot->turnLeft();
+//				break;
+//			case ApplicationUI::CMD_RIGHT:
+//				m_robot->turnRight();
+//				break;
+//			default:
+//				break;
+//			}
+//		}
 	}
 }
 
