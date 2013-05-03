@@ -59,7 +59,7 @@ NavigationPane {
                 listItemComponents: [
                     // define component which will represent list item GUI appearence
                     ListItemComponent {
-                        type: "item"
+                        //type: "item"
                         LevelListItem {
                             lastAvailableIndex: ListItem.view.levelAvailable
                         }
@@ -70,9 +70,9 @@ NavigationPane {
                     if (indexPath <= levelAvailable) _app.startLevel(indexPath);
                 }
                 horizontalAlignment: HorizontalAlignment.Fill
-                layoutProperties: StackLayoutProperties {
-                    spaceQuota: 1.0
-                }
+//                layoutProperties: StackLayoutProperties {
+//                    spaceQuota: 1.0
+//                }
             }
         }
     }

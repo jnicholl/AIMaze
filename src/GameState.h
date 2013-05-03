@@ -18,13 +18,21 @@ public:
 	void save();
 
 	int levelAvailable() const;
-	void setLevelComplete(int level);
+	void setLevelComplete(int level, int score);
+	int scoreForLevel(int level) {
+		if (level >= 0 && level < m_scores.count()) {
+			return m_scores[level];
+		}
+		return 0;
+	}
 
 signals:
 	void gameStateChanged();
+	void scoresChanged(int);
 
 private:
 	int m_levelAvailable;
+	QList<int> m_scores;
 };
 
 #endif /* GAMESTATE_H_ */

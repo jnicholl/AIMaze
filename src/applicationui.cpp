@@ -3,6 +3,7 @@
 
 #include <bb/cascades/AbsoluteLayoutProperties>
 #include <bb/cascades/Application>
+#include <bb/cascades/ArrayDataModel>
 #include <bb/cascades/QmlDocument>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/ListView>
@@ -61,6 +62,7 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 
 	// Load any stored game state
 	QObject::connect(&m_gameState, SIGNAL(gameStateChanged()), this, SLOT(onGameStateChanged()));
+	QObject::connect(&m_gameState, SIGNAL(scoresChanged(int)), this, SLOT(onScoresChanged(int)));
 	m_gameState.load();
 
 	// Connect tutorial manager signals
@@ -76,13 +78,19 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
     m_levelList = m_navigationPane->findChild<ListView*>("listView");
     if (!m_levelList) qFatal("Failed to find level list in QML");
 
+    m_levelDataModel = new ArrayDataModel();
+    for (int i=1; i<=9; i++) {
+    	QVariantMap item;
+    	item["id"] = i;
+    	item["text"] = i;
+    	item["level"] = QString("app/native/assets/levels/level%1.json").arg(i);
+    	item["score"] = m_gameState.scoreForLevel(i-1);
+    	m_levelDataModel->append(item);
+    }
+    m_levelList->setDataModel(m_levelDataModel);
+
     // set created root object as a scene
     app->setScene(m_navigationPane);
-
-    // Connect up timers.
-//    QObject::connect(&m_timer, SIGNAL(timeout()), this, SLOT(timerFired()));
-//    m_finishTimer.setSingleShot(true);
-//    QObject::connect(&m_finishTimer, SIGNAL(timeout()), this, SLOT(unpause()));
 
     // Connect run-phase signals
     QObject::connect(m_runPhase, SIGNAL(finished()), this, SLOT(onFinished()));
@@ -94,6 +102,23 @@ ApplicationUI::ApplicationUI(bb::cascades::Application *app)
 
 	QObject::connect(Application::instance(), SIGNAL(invisible()), m_mediaPlayer, SLOT(stop()));
     QObject::connect(Application::instance(), SIGNAL(awake()), m_mediaPlayer, SLOT(play()));
+}
+
+void ApplicationUI::onScoresChanged(int level) {
+	QVariant val = m_levelDataModel->value(level);
+	if (val.isValid()) {
+		QVariantMap item(val.toMap());
+		item["score"] = m_gameState.scoreForLevel(level);
+		qDebug("Updating score for level %d\n", level);
+		m_levelDataModel->replace(level, item);
+	} else {
+		qDebug("NOT updating score for level %d\n", level);
+	}
+}
+
+int ApplicationUI::scoreForLevel(const QVariantList &index)
+{
+	return m_gameState.scoreForLevel(index[0].toInt());
 }
 
 // Takes us back to the level selection screen.
@@ -265,6 +290,7 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 	m_map = new Map(height, width, endX, endY, data, m_mapArea, this);
 	Label *movesLabel = m_gamePage->findChild<Label*>("movesLeft");
 	m_robot = new Robot(m_map, moves, movesLabel, startX, startY, endX, endY, Robot::getDirection(direction), this);
+	QObject::connect(m_runPhase, SIGNAL(scoreChanged(int)), m_robot, SLOT(updateScore(int)));
 
 	// Set up planning phase function editor
 	m_functionHeader = static_cast<Container *>(m_gamePage->findChild<Container*>("functionHeader"));
@@ -318,6 +344,7 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 	if (!m_gamePage) {
 		QmlDocument *qml = QmlDocument::create("asset:///Game.qml").parent(this);
 		qml->setContextProperty("_app", this);
+		qml->setContextProperty("_runPhase", m_runPhase);
 		m_gamePage = qml->createRootObject<Page>();
 		m_tutorialManager.init(m_gamePage);
 		m_progressAnimation = m_gamePage->findChild<SequentialAnimation*>("progressAnimation");
@@ -328,6 +355,7 @@ void ApplicationUI::startLevel(const QVariantList &indexPath)
 	else
 		m_levelIndex = 0; // Uhoh?
 
+	m_runPhase->resetScore();
 	m_phase = COMPILE;
 	m_selectedFunction = 0;
 	setShouldShowFunctions(false);
@@ -794,7 +822,7 @@ void ApplicationUI::processFinish()
 		}
 //		text = "You won";
 		buttonText = "Next level";
-		m_gameState.setLevelComplete(m_levelIndex);
+		m_gameState.setLevelComplete(m_levelIndex, m_runPhase->score());
 	} else {
 //		text = "You lost";
 		buttonText = "Retry";

@@ -33,7 +33,8 @@ Page {
             preferredWidth: dimensions.playAreaWidth
             preferredHeight: dimensions.sidebarPadding
             textStyle.textAlign: TextAlign.Center
-            text: "10 moves left"
+            text: _runPhase.score
+            visible: !compilePhaseContainer.visible && _runPhase.score >= 0
         }
 
         Container {
@@ -572,9 +573,20 @@ Thank you for playing!"
             Container {
                 verticalAlignment: VerticalAlignment.Center
                 horizontalAlignment: HorizontalAlignment.Center
-                background: Color.Black // FIXME: Image
                 layout: StackLayout {}
                 
+                Container {
+                    // spacer
+                    preferredHeight: dimensions.queueItemPadding
+                }
+                Label { // FIXME: Need FONT
+                    textStyle.color: Color.create(0, 0.7, 0.7)
+                    horizontalAlignment: HorizontalAlignment.Center
+                    textStyle.fontSize: FontSize.XLarge
+                    textStyle.textAlign: TextAlign.Center
+                    visible: _runPhase.score != 0
+                    text: _runPhase.score > 0?"Score: " + _runPhase.score:"FAILED"
+                }
                 Button {
                     objectName: "menuButton"
                     horizontalAlignment: HorizontalAlignment.Center

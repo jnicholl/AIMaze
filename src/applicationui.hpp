@@ -16,6 +16,7 @@
 namespace bb {
 	namespace cascades {
 		class Application;
+		class ArrayDataModel;
 		class Container;
 		class ListView;
 		class NavigationPane;
@@ -103,6 +104,8 @@ public:
 
     Q_SLOT void robotMoved(int x, int y);
 
+    Q_SLOT int scoreForLevel(const QVariantList &index);
+
     void drawSelectedFunction();
 
     int functionCount() const { return m_functionCount; }
@@ -117,6 +120,7 @@ public:
     Q_SLOT void onGameStateChanged() {
     	emit levelAvailableChanged(m_gameState.levelAvailable());
     }
+    Q_SLOT void onScoresChanged(int level);
 
     bool shouldShowFunctions() const { return m_shouldShowFunctions; }
     void setShouldShowFunctions(bool val) {
@@ -205,6 +209,7 @@ private:
 
     // Level selection screen list
     bb::cascades::ListView *m_levelList;
+    bb::cascades::ArrayDataModel *m_levelDataModel;
     // Top-level navigation pane
     bb::cascades::NavigationPane *m_navigationPane;
 

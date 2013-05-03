@@ -14,13 +14,14 @@
 #include "robot.h"
 
 #define TIMER_INTERVAL 500
-#define TIMER_THRESHOLD 50
+#define TIMER_THRESHOLD 100
 
 RunPhase::RunPhase(QObject *parent)
 	: QObject(parent)
 	, m_queueManager(0)
 	, m_actionIndex(0)
 	, m_state(STOPPED)
+	, m_score(0)
 {
 	SoundManager *soundManager = new SoundManager(this); // TODO: Should this be passed in?
 	m_ddrManager = new DDRManager(soundManager, this);
@@ -51,6 +52,7 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 	m_actions.clear();
 	m_actionIndex = 0;
 	m_state = STOPPED;
+	setScore(0);
 
 	m_ddrManager->loadLevelSounds();
 
@@ -253,7 +255,21 @@ bool RunPhase::hasNoMoreActions()
 
 void RunPhase::moveRobot()
 {
-    // TODO: Calculate score here
+    // Relevant actions are m_actions[m_actionIndex - 4, 3, 2, and 1]
+//	int scoreValue = 0;
+//	for (int i=1; i<=4; i++) {
+//		if (m_actions[m_actionIndex - i].hit) {
+//			if (m_actions[m_actionIndex - i].hitTime < 10) {
+//				scoreValue += 500;
+//			} else if (m_actions[m_actionIndex - i].hitTime < 25) {
+//				scoreValue += 250;
+//			} else {
+//				scoreValue += 100;
+//			}
+//		}
+//	}
+//	setScore(score() + scoreValue);
+
 	ApplicationUI::CommandType cmd = m_actions[m_actionIndex - 1].action;
 	switch (cmd) {
 	case ApplicationUI::CMD_FORWARD:
@@ -271,6 +287,8 @@ void RunPhase::moveRobot()
 
 	if (hasNoMoreActions() || m_robot->finished()) {
 		m_timer.stop();
+		if (!m_robot->finished())
+			setScore(-1);
 		m_ddrManager->playEndTrack(m_robot->finished());
 		m_queueManager->animate(); // hide the queue actions
 		emit finished();
@@ -279,36 +297,37 @@ void RunPhase::moveRobot()
 
 void RunPhase::onCommand(ApplicationUI::CommandType cmd)
 {
-	int msec = m_timer.remaining();
-	int currentIndex = m_actionIndex;
-	if (msec < TIMER_THRESHOLD) {
-		currentIndex -= 1;
-	} else if (msec > TIMER_INTERVAL - TIMER_THRESHOLD) {
+	if (m_timer.isActive()) {
+		int msec = m_timer.remaining();
+		if (msec < 0) {
+			qDebug("ERROR: %d < 0\n", msec);
+			msec = std::abs(msec);
+		}
+		int hitTime = msec;
+		int currentIndex = m_actionIndex;
+		if (msec < TIMER_THRESHOLD) {
+			currentIndex -= 1;
+		} else if (msec > TIMER_INTERVAL - TIMER_THRESHOLD) {
+			hitTime = TIMER_INTERVAL - hitTime;
+		} else {
+			// ignore, not close enough to anything
+			return;
+		}
 
-	} else {
-		// ignore, not close enough to anything
-		return;
-	}
+		if (currentIndex >= 0 && currentIndex < m_actions.count()
+				&& cmd == m_actions[currentIndex].action) {
+			// We're okay
 
-	if (cmd == m_actions[currentIndex].action) {
-		// We're okay
-		m_actions[currentIndex].hit = true;
-//		if ((currentIndex % 4) == 3) {
-//			// FIXME: need to get cmd from actions somehow.
-//			switch (cmd) {
-//			case ApplicationUI::CMD_FORWARD:
-//				m_robot->moveForward();
-//				break;
-//			case ApplicationUI::CMD_LEFT:
-//				m_robot->turnLeft();
-//				break;
-//			case ApplicationUI::CMD_RIGHT:
-//				m_robot->turnRight();
-//				break;
-//			default:
-//				break;
-//			}
-//		}
+			m_actions[currentIndex].hit = true;
+			m_actions[currentIndex].hitTime = hitTime;
+			if (hitTime < 30) {
+				setScore(score() + 500);
+			} else if (hitTime < 50) {
+				setScore(score() + 250);
+			} else {
+				setScore(score() + 100);
+			}
+		}
 	}
 }
 

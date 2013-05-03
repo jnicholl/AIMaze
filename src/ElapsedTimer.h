@@ -12,6 +12,7 @@
 #include <QtCore/QTime>
 
 class ElapsedTimer: public QTimer {
+	Q_OBJECT
 public:
 	ElapsedTimer(QObject* parent=0);
 
@@ -19,8 +20,8 @@ public:
 	void start(int msec);
 	int remaining();
 
-private slots:
-	void reset();
+public slots:
+	void myreset();
 
 private:
 	QTime m_time;

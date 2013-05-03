@@ -26,15 +26,18 @@ struct CommandAction {
 		, function(f)
 		, stackDepth(s)
 		, hit(false)
+		, hitTime(0)
 	{}
 	ApplicationUI::CommandType action;
 	int function;
 	int stackDepth;
 	bool hit;
+	int hitTime;
 };
 
 class RunPhase : public QObject {
 	Q_OBJECT
+	Q_PROPERTY(int score READ score WRITE setScore NOTIFY scoreChanged)
 public:
 	enum State {
 		STOPPED = 0,
@@ -59,9 +62,21 @@ public:
 
 	void onCommand(ApplicationUI::CommandType cmd);
 
+	int score() const { return m_score; }
+	void setScore(int score) {
+		if (m_score != score) {
+			m_score = score;
+			emit scoreChanged(score);
+		}
+	}
+	void resetScore() {
+		setScore(0);
+	}
+
 signals:
 	void restartAnimation();
 	void finished();
+	void scoreChanged(int score);
 
 private:
 	Q_SLOT void moveRobot();
@@ -80,6 +95,7 @@ private:
 
 	State m_state;
 	int m_preloadCount;
+	int m_score;
 };
 
 #endif /* RUNPHASE_H_ */

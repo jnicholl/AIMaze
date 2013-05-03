@@ -51,6 +51,8 @@ public:
 
 	void setImageForPower(bool powered);
 
+	Q_SLOT void updateScore(int score);
+
 signals:
 	void moved(int x, int y);
 

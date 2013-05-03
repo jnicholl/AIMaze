@@ -5,10 +5,11 @@ import bb.cascades 1.0
 Container {
     id: listItem
     property int lastAvailableIndex
+    property int score: ListItemData.score
     layout: DockLayout {
     }
-    verticalAlignment: VerticalAlignment.Fill
-    horizontalAlignment: HorizontalAlignment.Fill
+    //verticalAlignment: VerticalAlignment.Fill
+    //horizontalAlignment: HorizontalAlignment.Fill
     preferredWidth: 160
     preferredHeight: 160
     
@@ -24,7 +25,14 @@ Container {
         onClicked: {
             listItem.ListItem.view.triggered(listItem.ListItem.indexPath);
         }
-
+    }
+    Label {
+        horizontalAlignment: HorizontalAlignment.Center
+        verticalAlignment: VerticalAlignment.Bottom
+        textStyle.textAlign: TextAlign.Center
+        textStyle.color: Color.create(0, 0.7, 0.7)
+        text: score
+        visible: score > 0
     }
 }
     //    Container {

@@ -10,7 +10,7 @@
 ElapsedTimer::ElapsedTimer(QObject* parent)
 	: QTimer(parent)
 {
-	connect(this, SIGNAL(timeout()), this, SLOT(reset()));
+	QObject::connect(this, SIGNAL(timeout()), this, SLOT(myreset()));
 }
 
 void ElapsedTimer::start()
@@ -30,7 +30,7 @@ int ElapsedTimer::remaining()
 	return interval() - m_time.elapsed();
 }
 
-void ElapsedTimer::reset()
+void ElapsedTimer::myreset()
 {
 	m_time.restart();
 }

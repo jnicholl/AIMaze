@@ -49,7 +49,7 @@ Container {
         }
     ]
     
-    onCreationCompleted: {
-        _app.moveLeft.connect(moveLeft);
-    }
+//    onCreationCompleted: {
+//        _app.moveLeft.connect(moveLeft);
+//    }
 }
