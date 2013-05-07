@@ -52,6 +52,7 @@ class ApplicationUI : public QObject
     Q_PROPERTY(bool isInF2 READ isInF2 NOTIFY isInF2Changed)
     Q_PROPERTY(bool isInF3 READ isInF3 NOTIFY isInF3Changed)
     Q_PROPERTY(int tutorial READ tutorial WRITE setTutorial NOTIFY tutorialChanged)
+    Q_PROPERTY(bool startButtonEnabled READ startButtonEnabled NOTIFY startButtonEnabledChanged)
 
 public:
     ApplicationUI(bb::cascades::Application *app);
@@ -178,6 +179,8 @@ public:
     	}
     }
 
+    bool startButtonEnabled() const;
+
     Q_SLOT void processFinish();
 
     int tutorial() const { return m_tutorialManager.tutorial(); }
@@ -193,6 +196,7 @@ signals:
 	void isInF2Changed(bool);
 	void isInF3Changed(bool);
 	void tutorialChanged(int);
+	void startButtonEnabledChanged(bool);
 
 private:
 	void computePath();

@@ -33,6 +33,7 @@ public:
 
 	// Increment the offset by 1 and start the 500ms animation to get there.
 	void animate();
+	void resetAnimation();
 
 	Q_INVOKABLE void remove(int index, bool force = false);
 	void add(ApplicationUI::CommandType type);
@@ -46,6 +47,7 @@ public:
 			emit offsetChanged(offset);
 		}
 	}
+	void showHit(int level);
 
 signals:
 	void spaceAvailable(int);

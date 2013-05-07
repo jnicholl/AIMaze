@@ -288,9 +288,9 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 
 	// Create map and robot
 	m_map = new Map(height, width, endX, endY, data, m_mapArea, this);
-	Label *movesLabel = m_gamePage->findChild<Label*>("movesLeft");
-	m_robot = new Robot(m_map, moves, movesLabel, startX, startY, endX, endY, Robot::getDirection(direction), this);
-	QObject::connect(m_runPhase, SIGNAL(scoreChanged(int)), m_robot, SLOT(updateScore(int)));
+//	Label *movesLabel = m_gamePage->findChild<Label*>("movesLeft");
+	m_robot = new Robot(m_map, moves, startX, startY, endX, endY, Robot::getDirection(direction), this);
+//	QObject::connect(m_runPhase, SIGNAL(scoreChanged(int)), m_robot, SLOT(updateScore(int)));
 
 	// Set up planning phase function editor
 	m_functionHeader = static_cast<Container *>(m_gamePage->findChild<Container*>("functionHeader"));
@@ -437,8 +437,40 @@ void ApplicationUI::addQueuedCommand(CommandType type)
 			m_functions[m_selectedFunction]->append(type);
 			drawSelectedFunction();
 			computePath();
+			emit startButtonEnabledChanged(startButtonEnabled());
 		}
 	}
+}
+
+bool ApplicationUI::startButtonEnabled() const
+{
+	if (m_functions.count() > 0 && m_functions[0] != 0) {
+		QList<Function *> called;
+		called.append(m_functions[0]);
+		for (int i=0; i<called.count(); i++) {
+			for (int j=0; j<called[i]->commandCount(); j++) {
+				int f = 1;
+				switch (called[i]->at(j))
+				{
+				case CMD_FORWARD:
+				case CMD_LEFT:
+				case CMD_RIGHT:
+					return true;
+				case CMD_F3:
+					f++;
+				case CMD_F2:
+					f++;
+				case CMD_F1:
+					if (!called.contains(m_functions[f])) {
+						called.append(m_functions[f]);
+					}
+					break;
+				}
+			}
+		}
+		return false;
+	} else
+		return false;
 }
 
 void ApplicationUI::computePath()
@@ -669,6 +701,7 @@ void ApplicationUI::removeFunctionCommand(int index)
 	m_functions[m_selectedFunction]->remove(index);
 	drawSelectedFunction();
 	computePath();
+	emit startButtonEnabledChanged(startButtonEnabled());
 }
 
 void ApplicationUI::highlightFunction(int function, int pc)

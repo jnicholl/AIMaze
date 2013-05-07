@@ -23,19 +23,40 @@ Page {
             }
         }
         
-        Label {
-            id: movesLeftLabel
-            objectName: "movesLeft"
+        Container {
             layoutProperties: AbsoluteLayoutProperties {
                 positionX: 0
-                positionY: compilePhaseContainer.visible ? 0 : dimensions.queueHeight - dimensions.itemPadding
+                positionY: compilePhaseContainer.visible ? 0 : dimensions.queueHeight //- dimensions.itemPadding
             }
             preferredWidth: dimensions.playAreaWidth
-            preferredHeight: dimensions.sidebarPadding
-            textStyle.textAlign: TextAlign.Center
-            text: _runPhase.score
-            visible: !compilePhaseContainer.visible && _runPhase.score >= 0
-        }
+            preferredHeight: dimensions.sidebarPadding * 2
+            visible: ! compilePhaseContainer.visible && _runPhase.score >= 0
+            layout: DockLayout {}
+	        ScoreContainer {
+	            id: scoreContainer
+	            objectName: "scoreContainer"
+	            horizontalAlignment: HorizontalAlignment.Center
+                verticalAlignment: VerticalAlignment.Center
+//                preferredWidth: dimensions.playAreaWidth
+//	            preferredHeight: dimensions.sidebarPadding * 2
+	            number: _runPhase.score
+	            oldNumber: _runPhase.oldScore
+	            
+	        }
+	    }
+//        Label {
+//            id: movesLeftLabel
+//            objectName: "movesLeft"
+//            layoutProperties: AbsoluteLayoutProperties {
+//                positionX: 0
+//                positionY: compilePhaseContainer.visible ? 0 : dimensions.queueHeight - dimensions.itemPadding
+//            }
+//            preferredWidth: dimensions.playAreaWidth
+//            preferredHeight: dimensions.sidebarPadding
+//            textStyle.textAlign: TextAlign.Center
+//            text: _runPhase.score
+//            visible: !compilePhaseContainer.visible && _runPhase.score >= 0
+//        }
 
         Container {
             id: functionSlideoutContainer
@@ -458,6 +479,7 @@ Page {
 		    preferredWidth: dimensions.playAreaWidth
 		    preferredHeight: dimensions.screenHeight
             startButtonVisible: _app.tutorial == 0
+            startButtonEnabled: _app.startButtonEnabled
 		    onStart: {
                 compilePhaseContainer.setVisible(false);
                 _app.compilePhaseDone();
@@ -474,10 +496,8 @@ Page {
             id: tutorial1Container
             objectName: "tutorial1Container"
             visible: (_app.tutorial == 1)
-            onStart: {
-                console.log("Started");
+            onHideTutorial: {
                 _app.tutorial = 0;
-                //compilePhaseContainer.start(); // FIXME: Tutorial needs changes
             }        
             onShowRun: {
                 compilePhaseContainer.visible = false;

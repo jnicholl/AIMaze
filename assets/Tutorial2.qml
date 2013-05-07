@@ -1,106 +1,58 @@
 import bb.cascades 1.0
 
 Container {
-    id:tutorial
-    property variant dimensions: Dimensions {}    
+    id: tutorial
+    property variant dimensions: Dimensions {
+    }
     property int state: 1
 
+    signal hideTutorial
     signal showRun
     signal showCompile
-    signal hideTutorial
 
     preferredWidth: dimensions.screenWidth
     preferredHeight: dimensions.screenHeight
     layout: DockLayout {
     }
-    
-    onStateChanged: {
-        showScreen();
-    }
+
     function showScreen() {
-        console.log("State = " + state);
-        if (state == 0) {
-            tutorial.showCompile();
-            next.text = "Next";
+    }
+
+    Container {
+        visible: state == 0
+        preferredWidth: dimensions.screenWidth
+        preferredHeight: dimensions.screenHeight
+        background: Color.create(0, 0.3, 0.3, 0.7)
+        layout: DockLayout {
         }
-        if (state == 1) {
-            tutorial.showRun();
-            next.text = "Done";
-        }
-        if (state == 2) {
-            tutorial.showCompile();
-            tutorial.hideTutorial();
+        Label {
+            horizontalAlignment: HorizontalAlignment.Center
+            verticalAlignment: VerticalAlignment.Center
+            textStyle.textAlign: TextAlign.Center
+            multiline: true
+            text: "EMUU Training - Part 2
+
+I guess you did alright with the sim. We found something new, poking around in the guts of the thing. It has a little extra memory for storing stuff to do later. One of the programmers clearly has no imagination, he just called them functions."
         }
     }
 
-	Container {
-	    layout: AbsoluteLayout {
-	    }
-	    Label {
-	        preferredWidth: dimensions.playAreaWidth / 3
-	        text: "Add action to function"
-	        multiline: true
-	        textStyle.textAlign: TextAlign.Center
-	        textStyle.color: Color.create("#BAEEFF")
-	        layoutProperties: AbsoluteLayoutProperties {
-	            positionX: 400
-	            positionY: 100
-	        }
-	        visible: state == 0
-	    }
-	
-	    Label {
-	        preferredWidth: dimensions.playAreaWidth / 2
-	        text: "Tap to remove "
-	        multiline: true
-	        textStyle.textAlign: TextAlign.Center
-	        textStyle.color: Color.create("#BAEEFF")
-	        layoutProperties: AbsoluteLayoutProperties {
-	            positionX: 200
-	            positionY: 520
-	        }
-	        visible:state==0
-	    }
-	
-	    Label {
-	        preferredWidth: 500
-	        text: "All actions inside a function are executed within one move"
-	        multiline: true
-	        textStyle.textAlign: TextAlign.Center
-	        textStyle.color: Color.create("#BAEEFF")
-	        layoutProperties: AbsoluteLayoutProperties {
-	            positionX: 50
-	            positionY: 350
-	        }
-	        visible: state == 0
-	    }
-	    
-	    Label {
-	        preferredWidth: dimensions.playAreaWidth / 3
-	        text: "View actions within functions"
-	        multiline: true
-	        textStyle.textAlign: TextAlign.Center
-	        textStyle.color: Color.create("#BAEEFF")
-	        layoutProperties: AbsoluteLayoutProperties {
-	            positionX: 400
-	            positionY: 400
-	        }
-	        visible: state == 1
-	    }
-	
-	    Label {
-	        preferredWidth: dimensions.playAreaWidth
-	        text: "Add function to queue"
-	        multiline: true
-	        textStyle.textAlign: TextAlign.Center
-	        textStyle.color: Color.create("#BAEEFF")
-	        layoutProperties: AbsoluteLayoutProperties {
-	            positionX: 120
-	            positionY: 325
-	        }
-	        visible: state == 1
-	    }
-	}
+    Container {
+        visible: state == 1
+        preferredWidth: dimensions.screenWidth
+        preferredHeight: dimensions.screenHeight
+        background: Color.create(0, 0.3, 0.3, 0.7)
+        layout: DockLayout {
+        }
+        Label {
+            horizontalAlignment: HorizontalAlignment.Center
+            verticalAlignment: VerticalAlignment.Center
+            textStyle.textAlign: TextAlign.Center
+            multiline: true
+            text: "EMUU Training - Part 2
+
+So we changed the simulator a bit. What, you think we'd let you touch the real thing? Let's see how well you do with a little more memory. You can switch between functions by tapping the M. I'm only giving you access to one function, I'm sure you can figure out how to use it."
+        }
+    }
 
     Container {
         layout: StackLayout {
@@ -108,6 +60,7 @@ Container {
         }
         horizontalAlignment: HorizontalAlignment.Center
         verticalAlignment: VerticalAlignment.Bottom
+        bottomPadding: dimensions.itemPadding
 
         Button {
             text: "Previous"
@@ -122,19 +75,19 @@ Container {
             id: skip
             text: "Skip"
             onClicked: {
-                state = 2;
+                tutorial.hideTutorial();
             }
-            enabled: state < 2
+            enabled: state < 1
             rightMargin: dimensions.queueItemPadding
         }
 
         Button {
             id: next
-            text: "Next"
+            text: state < 1 ? "Next" : "Done"
             onClicked: {
                 state ++;
+                if (state > 1) tutorial.hideTutorial();
             }
-            enabled: state < 2
             rightMargin: dimensions.queueItemPadding
         }
     }

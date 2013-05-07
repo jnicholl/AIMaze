@@ -94,6 +94,12 @@ void QueueManager::add(ApplicationUI::CommandType type)
 	// TODO: return failure to show user queue full?
 }
 
+void QueueManager::resetAnimation()
+{
+	m_animation->stop();
+	setOffset(0);
+}
+
 void QueueManager::animate()
 {
 	setOffset(m_offset + 1);
@@ -122,4 +128,12 @@ void QueueManager::remove(int index, bool force)
 ApplicationUI::CommandType QueueManager::peek() const
 {
 	return m_queueCommands[0];
+}
+
+void QueueManager::showHit(int index)
+{
+	if (index >= 0 && index < m_queue.count()) {
+		qDebug("Show hit %d\n", index);
+		m_queue[index]->setVisible(false);
+	}
 }

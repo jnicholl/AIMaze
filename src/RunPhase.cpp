@@ -22,6 +22,7 @@ RunPhase::RunPhase(QObject *parent)
 	, m_actionIndex(0)
 	, m_state(STOPPED)
 	, m_score(0)
+	, m_oldScore(0)
 {
 	SoundManager *soundManager = new SoundManager(this); // TODO: Should this be passed in?
 	m_ddrManager = new DDRManager(soundManager, this);
@@ -52,6 +53,7 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 	m_actions.clear();
 	m_actionIndex = 0;
 	m_state = STOPPED;
+	setOldScore(0);
 	setScore(0);
 
 	m_ddrManager->loadLevelSounds();
@@ -118,6 +120,12 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 		}
 	}
 
+	if (m_actions.count() <= 0) {
+		// error out
+		emit finished();
+		return;
+	}
+
 	// Add all the actions to the queue.
 	for (int i=0; i<m_actions.count(); i++) {
 		m_queueManager->add(m_actions[i].action);
@@ -160,18 +168,12 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 void RunPhase::fillQueue(int count)
 {
 	m_actionIndex += count;
-//	if (count > m_actions.count() - m_actionIndex)
-//		count = m_actions.count() - m_actionIndex;
-//
-//	for (int i=0; i<count; i++) {
-//		//if (m_actions[m_actionIndex].function == 0) // FIXME: Currently not adding function actions
-//		m_queueManager->add(m_actions[m_actionIndex].action);
-//		m_actionIndex++;
-//	}
 }
 
 void RunPhase::pause()
 {
+	m_actionIndex = 0;
+	m_queueManager->resetAnimation();
 	m_preloadCount = 5;
 	m_levelStartTimer.stop();
 	m_clapTimer.stop();
@@ -180,21 +182,10 @@ void RunPhase::pause()
 
 void RunPhase::resume()
 {
-	switch (m_state) {
-	case PRELOAD:
-		m_levelStartTimer.start(TIMER_INTERVAL);
-
-		break;
-	case CLAP:
-		onLevelPreStart();
-		break;
-	case RUN:
-		onLevelStart(); // FIXME: Properly handle resuming level start or fractional timer
-		break;
-	case STOPPED:
-	default:
-		break;
-	}
+	setScore(0);
+	m_state = PRELOAD;
+	m_preloadCount = 5;
+	m_levelStartTimer.start(TIMER_INTERVAL);
 }
 
 // Countdown: 5 - invisible in 5
@@ -249,27 +240,10 @@ void RunPhase::timerFired()
 bool RunPhase::hasNoMoreActions()
 {
 	return (m_actionIndex >= m_actions.count());
-//		return false;
-//	return m_queueManager->empty();
 }
 
 void RunPhase::moveRobot()
 {
-    // Relevant actions are m_actions[m_actionIndex - 4, 3, 2, and 1]
-//	int scoreValue = 0;
-//	for (int i=1; i<=4; i++) {
-//		if (m_actions[m_actionIndex - i].hit) {
-//			if (m_actions[m_actionIndex - i].hitTime < 10) {
-//				scoreValue += 500;
-//			} else if (m_actions[m_actionIndex - i].hitTime < 25) {
-//				scoreValue += 250;
-//			} else {
-//				scoreValue += 100;
-//			}
-//		}
-//	}
-//	setScore(score() + scoreValue);
-
 	ApplicationUI::CommandType cmd = m_actions[m_actionIndex - 1].action;
 	switch (cmd) {
 	case ApplicationUI::CMD_FORWARD:
@@ -306,26 +280,31 @@ void RunPhase::onCommand(ApplicationUI::CommandType cmd)
 		int hitTime = msec;
 		int currentIndex = m_actionIndex;
 		if (msec < TIMER_THRESHOLD) {
-			currentIndex -= 1;
+
 		} else if (msec > TIMER_INTERVAL - TIMER_THRESHOLD) {
+			currentIndex--;
 			hitTime = TIMER_INTERVAL - hitTime;
 		} else {
 			// ignore, not close enough to anything
 			return;
 		}
 
+		qDebug("hitTime = %d, msec = %d, currentIndex = %d\n", hitTime, msec, currentIndex);
 		if (currentIndex >= 0 && currentIndex < m_actions.count()
 				&& cmd == m_actions[currentIndex].action) {
 			// We're okay
 
-			m_actions[currentIndex].hit = true;
-			m_actions[currentIndex].hitTime = hitTime;
-			if (hitTime < 30) {
-				setScore(score() + 500);
-			} else if (hitTime < 50) {
-				setScore(score() + 250);
-			} else {
-				setScore(score() + 100);
+			if (!m_actions[currentIndex].hit) {
+				m_queueManager->showHit(currentIndex);
+				m_actions[currentIndex].hit = true;
+				m_actions[currentIndex].hitTime = hitTime;
+				if (hitTime < 30) {
+					setScore(score() + 500);
+				} else if (hitTime < 50) {
+					setScore(score() + 250);
+				} else {
+					setScore(score() + 100);
+				}
 			}
 		}
 	}

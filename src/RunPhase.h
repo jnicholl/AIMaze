@@ -38,6 +38,7 @@ struct CommandAction {
 class RunPhase : public QObject {
 	Q_OBJECT
 	Q_PROPERTY(int score READ score WRITE setScore NOTIFY scoreChanged)
+	Q_PROPERTY(int oldScore READ oldScore WRITE setOldScore NOTIFY oldScoreChanged)
 public:
 	enum State {
 		STOPPED = 0,
@@ -65,6 +66,7 @@ public:
 	int score() const { return m_score; }
 	void setScore(int score) {
 		if (m_score != score) {
+			setOldScore(m_score);
 			m_score = score;
 			emit scoreChanged(score);
 		}
@@ -73,10 +75,19 @@ public:
 		setScore(0);
 	}
 
+	int oldScore() const { return m_oldScore; }
+	void setOldScore(int score) {
+		if (m_oldScore != score) {
+			m_oldScore = score;
+			emit oldScoreChanged(score);
+		}
+	}
+
 signals:
 	void restartAnimation();
 	void finished();
 	void scoreChanged(int score);
+	void oldScoreChanged(int score);
 
 private:
 	Q_SLOT void moveRobot();
@@ -96,6 +107,7 @@ private:
 	State m_state;
 	int m_preloadCount;
 	int m_score;
+	int m_oldScore;
 };
 
 #endif /* RUNPHASE_H_ */

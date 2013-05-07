@@ -15,12 +15,14 @@ ElapsedTimer::ElapsedTimer(QObject* parent)
 
 void ElapsedTimer::start()
 {
+	qDebug("Start");
 	m_time.start();
 	QTimer::start();
 }
 
 void ElapsedTimer::start(int msec)
 {
+	qDebug("Start");
 	m_time.start();
 	QTimer::start(msec);
 }
@@ -32,6 +34,7 @@ int ElapsedTimer::remaining()
 
 void ElapsedTimer::myreset()
 {
+	qDebug("Reset");
 	m_time.restart();
 }
 

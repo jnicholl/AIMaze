@@ -4,6 +4,7 @@ Container {
     id: compilePhaseContainer
     property variant dimensions: Dimensions {}
     property alias startButtonVisible: startButton.visible
+    property alias startButtonEnabled: startButton.enabled
     signal start
     signal selectNext
     signal removeAction(int index)
@@ -25,10 +26,8 @@ Container {
             verticalAlignment: VerticalAlignment.Center
             horizontalAlignment: HorizontalAlignment.Center
             onClicked: {
-                console.log("Clicked Start Button");
                 compilePhaseContainer.start();
             }
-//            visible: _app.tutorial == 0
         }
     }
     Container {

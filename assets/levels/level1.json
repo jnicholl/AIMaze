@@ -2,14 +2,15 @@
 "width": 3, 
 "height": 3, 
 "startX": 0, 
-"startY": 1, 
+"startY": 2, 
 "startDir": "right", 
 "endX": 2, 
-"endY": 1, 
+"endY": 2, 
 "data": [1, 1, 1, 
 		1, 1, 1, 
 		1, 1, 1],
 "numFunctions": 0, 
 "functionLimit": [],
-"totalMoves": 4
+"totalMoves": 4,
+"tutorial": 1
 }
