@@ -371,8 +371,8 @@ Page {
 			SidebarCommand {
                 id: cmdForward
                 ImageButton {
-                    defaultImageSource: "asset:///images/forward.png"
-                    pressedImageSource: "asset:///images/forwardp.png"
+                    defaultImageSource: compilePhaseContainer.visible?"asset:///images/forward.png":"asset:///images/odd2.png"
+                    pressedImageSource: compilePhaseContainer.visible?"asset:///images/forwardp.png" : "asset:///images/odd2p.png"
                     onClicked: {
                         _app.tapForward();
                     }
@@ -382,8 +382,8 @@ Page {
             SidebarCommand {
                 id: cmdLeft
                 ImageButton {
-                    defaultImageSource: "asset:///images/left.png"
-                    pressedImageSource: "asset:///images/leftp.png"
+                    defaultImageSource: compilePhaseContainer.visible ? "asset:///images/left.png" : "asset:///images/odd3.png"
+                    pressedImageSource: compilePhaseContainer.visible ? "asset:///images/leftp.png" : "asset:///images/odd3p.png"
                     onClicked: {
                         _app.tapLeft();
                     }
@@ -393,8 +393,8 @@ Page {
             SidebarCommand {
                 id: cmdRight
                 ImageButton {
-                    defaultImageSource: "asset:///images/right.png"
-                    pressedImageSource: "asset:///images/rightp.png"
+                    defaultImageSource: compilePhaseContainer.visible ? "asset:///images/right.png" : "asset:///images/odd4.png"
+                    pressedImageSource: compilePhaseContainer.visible ? "asset:///images/rightp.png" : "asset:///images/odd4p.png"
                     onClicked: {
                         _app.tapRight();
                     }
@@ -437,17 +437,17 @@ Page {
                 }
             }
 
-            SidebarCommand {
-                id: cmdViewFunctions
-                visible: _app.functionCount > 1 && compilePhaseContainer.visible == false
-                ImageButton {
-                    defaultImageSource: "asset:///images/viewfunctions.png"
-                    pressedImageSource: "asset:///images/viewfunctionsp.png"
-                    onClicked: {
-                        _app.tapViewFunctions();
-                    }
-                }
-            }
+//            SidebarCommand {
+//                id: cmdViewFunctions
+//                visible: _app.functionCount > 1 && compilePhaseContainer.visible == false
+//                ImageButton {
+//                    defaultImageSource: "asset:///images/viewfunctions.png"
+//                    pressedImageSource: "asset:///images/viewfunctionsp.png"
+//                    onClicked: {
+//                        _app.tapViewFunctions();
+//                    }
+//                }
+//            }
         }
 
         Container {

@@ -187,6 +187,8 @@ public:
     void setTutorial(int tutorial) { m_tutorialManager.setTutorial(tutorial); }
 
     static QString getImageForCommand(CommandType type);
+    static QString getGlyphForCommand(CommandType type, int index);
+    static CommandType getGlyph(CommandType type, int index);
 
 signals:
 	void functionCountChanged(int);

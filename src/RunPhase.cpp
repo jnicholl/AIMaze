@@ -128,7 +128,7 @@ void RunPhase::init(Robot *robot, QueueManager *queueMgr, QList<Function*> funct
 
 	// Add all the actions to the queue.
 	for (int i=0; i<m_actions.count(); i++) {
-		m_queueManager->add(m_actions[i].action);
+		m_queueManager->add(m_actions[i].action, i % 4);
 	}
 	m_queueManager->doneActions();
 
@@ -291,7 +291,7 @@ void RunPhase::onCommand(ApplicationUI::CommandType cmd)
 
 		qDebug("hitTime = %d, msec = %d, currentIndex = %d\n", hitTime, msec, currentIndex);
 		if (currentIndex >= 0 && currentIndex < m_actions.count()
-				&& cmd == m_actions[currentIndex].action) {
+				&& cmd == ApplicationUI::getGlyph(m_actions[currentIndex].action, currentIndex % 4)) {
 			// We're okay
 
 			if (!m_actions[currentIndex].hit) {

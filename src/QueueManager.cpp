@@ -70,13 +70,13 @@ void QueueManager::doneActions()
 	m_animation = builder;
 }
 
-void QueueManager::add(ApplicationUI::CommandType type)
+void QueueManager::add(ApplicationUI::CommandType type, int seqNum)
 {
 	int index = m_queue.count();
 	m_queueCommands.append(type);
 	Container *c = m_qmlDoc->createRootObject<Container>();
 	c->setProperty("index", index);
-	c->setProperty("imageSource", ApplicationUI::getImageForCommand(type));
+	c->setProperty("imageSource", ApplicationUI::getGlyphForCommand(type, seqNum));
 	m_container->add(c);
 	m_queue.append(c);
 	m_queueCount++;

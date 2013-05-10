@@ -425,6 +425,101 @@ QString ApplicationUI::getImageForCommand(CommandType type)
 	return text;
 }
 
+ApplicationUI::CommandType ApplicationUI::getGlyph(CommandType type, int index)
+{
+	if (index < 0 || index > 3) return type;
+
+	switch (type) {
+	case CMD_FORWARD:
+		switch (index) {
+		case 0:
+			return CMD_FORWARD;
+		case 1:
+			return CMD_RIGHT;
+		case 2:
+			return CMD_LEFT;
+		case 3:
+			return CMD_FORWARD;
+		}
+		break;
+	case CMD_LEFT:
+		switch (index) {
+		case 0:
+			return CMD_LEFT;
+		case 1:
+			return CMD_LEFT;
+		case 2:
+			return CMD_RIGHT;
+		case 3:
+			return CMD_FORWARD;
+		}
+		break;
+	case CMD_RIGHT:
+		switch (index) {
+		case 0:
+			return CMD_FORWARD;
+		case 1:
+			return CMD_RIGHT;
+		case 2:
+			return CMD_LEFT;
+		case 3:
+			return CMD_RIGHT;
+		}
+		break;
+	default:
+		break;
+	}
+	return CMD_EMPTY;
+}
+
+QString ApplicationUI::getGlyphForCommand(CommandType type, int index)
+{
+	QString text = ""; // invalid URL indicates no image.
+	if (index < 0 || index > 3) return ApplicationUI::getImageForCommand(type);
+
+	switch (type) {
+	case CMD_FORWARD:
+		switch (index) {
+		case 0:
+			return "asset:///images/odd2.png";
+		case 1:
+			return "asset:///images/odd4.png";
+		case 2:
+			return "asset:///images/odd3.png";
+		case 3:
+			return "asset:///images/odd2.png";
+		}
+		break;
+	case CMD_LEFT:
+		switch (index) {
+		case 0:
+			return "asset:///images/odd3.png";
+		case 1:
+			return "asset:///images/odd3.png";
+		case 2:
+			return "asset:///images/odd4.png";
+		case 3:
+			return "asset:///images/odd2.png";
+		}
+		break;
+	case CMD_RIGHT:
+		switch (index) {
+		case 0:
+			return "asset:///images/odd2.png";
+		case 1:
+			return "asset:///images/odd4.png";
+		case 2:
+			return "asset:///images/odd3.png";
+		case 3:
+			return "asset:///images/odd4.png";
+		}
+		break;
+	default:
+		break;
+	}
+	return text;
+}
+
 void ApplicationUI::addQueuedCommand(CommandType type)
 {
 	if (type == CMD_EMPTY) return;

@@ -36,7 +36,7 @@ public:
 	void resetAnimation();
 
 	Q_INVOKABLE void remove(int index, bool force = false);
-	void add(ApplicationUI::CommandType type);
+	void add(ApplicationUI::CommandType type, int seqNum = -1);
 	ApplicationUI::CommandType peek() const;
 	bool empty() const { return m_queueCount == 0; }
 
