@@ -39,6 +39,8 @@ NavigationPane {
 
     firstPage: Page {
         id: pgMain
+        property variant dimensions: Dimensions {
+        }
         content: Container {
             background: Color.Black
             ImageView {
@@ -52,6 +54,7 @@ NavigationPane {
                 objectName: "listView"
                 property int levelAvailable: _app.levelAvailable
                 layout: GridListLayout {
+                    columnCount: pgMain.dimensions.screenWidth > 800 ? 5 : 3
                 }
                 dataModel: XmlDataModel {
                     source: "asset:///levels.xml"
