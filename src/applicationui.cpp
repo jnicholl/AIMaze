@@ -231,6 +231,9 @@ void ApplicationUI::setupLevel(const QVariantMap &levelData)
 		delete f;
 	}
 
+	// Disable the start button
+	emit startButtonEnabledChanged(startButtonEnabled());
+
 	m_mapArea = m_gamePage->findChild<Container*>("mapArea");
 	if (!m_mapArea) {
 		qDebug("Failed to find map area");
